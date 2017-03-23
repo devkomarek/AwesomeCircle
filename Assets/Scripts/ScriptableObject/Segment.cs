@@ -7,7 +7,7 @@ namespace Assets.Scripts.ScriptableObject
     public class Segment
     {
         [SerializeField] private Color _color;
-        [SerializeField] private int _concentration;
+        [SerializeField] private int _dotConcentration;
         [SerializeField] private float _end;
         [SerializeField] private Material _material;
         [SerializeField] private float _start;
