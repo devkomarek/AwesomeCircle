@@ -44,10 +44,10 @@ namespace Assets.Scripts.ScriptableObject
             set { _material = value; }
         }
 
-        public int Concentration
+        public int DotConcentration
         {
-            get { return _concentration; }
-            set { _concentration = value; }
+            get { return _dotConcentration; }
+            set { _dotConcentration = value; }
         }
 
         public float Width

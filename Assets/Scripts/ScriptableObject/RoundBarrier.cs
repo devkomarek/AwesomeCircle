@@ -8,7 +8,7 @@ namespace Assets.Scripts.ScriptableObject
     public class RoundBarrier
     {
         [SerializeField] private string _roundBarrierName;
-        [SerializeField] private List<Segment> _segmentList;
+        [SerializeField] private List<Segment> _segmentsList;
 
         public string RoundBarrierName
         {
@@ -16,10 +16,10 @@ namespace Assets.Scripts.ScriptableObject
             set { _roundBarrierName = value; }
         }
 
-        public List<Segment> SegmentList
+        public List<Segment> SegmentsList
         {
-            get { return _segmentList; }
-            set { _segmentList = value; }
+            get { return _segmentsList; }
+            set { _segmentsList = value; }
         }
     }
 }
