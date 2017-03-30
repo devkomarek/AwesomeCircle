@@ -1,20 +1,18 @@
 ﻿#region
 
-using System.Collections.Generic;
-using Assets.Editor.Database;
-using Assets.Scripts.ScriptableObject;
+using Assets.Editor.Scripts.Database;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
 #endregion
 
-namespace Assets.Editor.Window.RoundBarrier_Editor{
+namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor{
     public partial class RoundBarrierEditor : EditorWindow{
         private const string ROUNDBARRIER_DATABASE_NAME = @"RoundBarrierDatabase.asset";
         private const string SEGMENT_DATABASE_NAME = @"SegmentDatabase.asset";
         private const string WAVE_DATABASE_NAME = @"WaveDatabase.asset";
-        private const string DATABASE_PATH = @"Database";
+        private const string DATABASE_PATH = @"Editor/Database";
         private const string DATABASE_PROPERTY_NAME = @"_database";
         private const string WAVE_PROPERTY_NAME = @"_waveName";
         private const string ROUNDBARRIER_PROPERTY_NAME = @"_roundBarrierName";

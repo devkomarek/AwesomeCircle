@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Editor.Database
+namespace Assets.Editor.Scripts.Database
 {
     public class ScriptableObjectDatabase<T> : UnityEngine.ScriptableObject where T : class
     {

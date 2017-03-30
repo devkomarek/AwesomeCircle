@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Editor.Window.RoundBarrier_Editor
+namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
 {
     public partial class RoundBarrierEditor
     {

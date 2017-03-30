@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
-using Assets.Editor.Database;
+using Assets.Editor.Scripts.Database;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Editor.Popup
+namespace Assets.Editor.Scripts.Popup
 {
     public class LoadRoundBarrier : PopupWindowContent
     {
         private const string WAVE_DATABASE_NAME = @"WaveDatabase.asset";
-        private const string DATABASE_PATH = @"Database";
+        private const string DATABASE_PATH = @"Editor/Database";
         private RoundBarrierDatabase _roundBarrierDatabase;
         private Vector2 _roundBarrierscrollVector2;
         private List<bool> _toogleList;

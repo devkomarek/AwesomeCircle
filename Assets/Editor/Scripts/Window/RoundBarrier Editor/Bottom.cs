@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Assets.Editor.Popup;
+using Assets.Editor.Scripts.Popup;
 using Assets.Scripts.ScriptableObject;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Editor.Window.RoundBarrier_Editor
+namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
 {
     partial class RoundBarrierEditor
     {
