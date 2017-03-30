@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.ScriptableObject
 {
+    [Serializable]
     public class Wave
     {
         [SerializeField] private List<RoundBarrier> _roundBarriersList;

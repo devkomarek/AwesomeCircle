@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.ScriptableObject
 {
+    [Serializable]
     public class Segment
     {
         [SerializeField] private Color _color;

@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.ScriptableObject
 {
+    [Serializable]
     public class RoundBarrier
     {
         [SerializeField] private string _roundBarrierName;

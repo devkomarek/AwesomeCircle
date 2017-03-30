@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.ScriptableObject;
 
-namespace Assets.Scripts.Editor.Database{
+namespace Assets.Editor.Database{
     public class SegmentDatabase : ScriptableObjectDatabase<Segment>{
     }
 }
