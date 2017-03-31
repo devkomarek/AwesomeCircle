@@ -37,7 +37,6 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
         private void DisplayWave()
         {
             _waveScrollVector2 = EditorGUILayout.BeginScrollView(_waveScrollVector2, "Box", GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true), GUILayout.MaxWidth(200), GUILayout.MinWidth(50));
-            ApplayModified();
             _waveReorderableList.DoLayoutList();
             EditorGUILayout.EndScrollView();
         }
@@ -45,7 +44,6 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
         private void DisplayRoundBarriers()
         {
             _roundBarrierscrollVector2 = EditorGUILayout.BeginScrollView(_roundBarrierscrollVector2, "Box", GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true), GUILayout.MaxWidth(350), GUILayout.MinWidth(100));
-            ApplayModified();
             _roundBarrierReorderableList.DoLayoutList();
             EditorGUILayout.EndScrollView();
             VerticalSpace();
@@ -54,7 +52,6 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
         private void DisplayDetails()
         {
             _viewScrollVector2 = EditorGUILayout.BeginScrollView(_viewScrollVector2, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true), GUILayout.MinWidth(200), GUILayout.MaxWidth(200));
-            ApplayModified();
             _segmentReorderableList.DoLayoutList();
             EditorGUILayout.EndScrollView();
             VerticalSpace();
@@ -77,8 +74,6 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
 
             waveDataName.stringValue = EditorGUILayout.TextField("Name", waveDataName.stringValue, GUILayout.MinWidth(100));
             waveBetweenTime.stringValue = EditorGUILayout.TextField("InterTime", waveBetweenTime.stringValue);
-
-            ApplayModified();
         }
     }
 }
