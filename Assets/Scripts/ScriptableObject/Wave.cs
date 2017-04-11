@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Assets.Scripts.ScriptableObject
 {
     [Serializable]
-    public class Wave
+    public class Wave : UnityEngine.ScriptableObject
     {
         [SerializeField] private List<RoundBarrier> _roundBarriersList;
         [SerializeField] private string _timeBetweenRoundBarriers;

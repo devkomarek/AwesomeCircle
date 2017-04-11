@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Assets.Scripts.ScriptableObject
 {
     [Serializable]
-    public class Segment
+    public class Segment : UnityEngine.ScriptableObject
     {
         [SerializeField] private Color _color;
         [SerializeField] private int _dotConcentration;
