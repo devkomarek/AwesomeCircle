@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Assets.Editor.Scripts.Database;
+using Assets.Scripts.ScriptableObject.Database;
 using UnityEditor;
 using UnityEngine;
 

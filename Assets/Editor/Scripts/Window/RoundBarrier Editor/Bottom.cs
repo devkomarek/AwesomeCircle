@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Assets.Editor.Scripts.Popup;
 using Assets.Scripts.ScriptableObject;
+using Assets.Scripts.ScriptableObject.Database;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,6 +11,19 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
     {
         private void BottomWaveBar()
         {
+            if (GUILayout.Button("Save"))
+            {
+                WaveDatabase doneWaveDatabase = WaveDatabase.GetDatabase<WaveDatabase>(DONE_WAVE_DATABASE_PATH, WAVE_DATABASE_NAME);
+                doneWaveDatabase.Clear();
+                WaveDatabase tmpWaveDatabase = Instantiate(_waveDatabase);
+                for (int i = 0; i < _waveDatabase.Count; i++)
+                {
+                    doneWaveDatabase.Add(tmpWaveDatabase.Get(i));
+                }
+
+                EditorUtility.SetDirty(doneWaveDatabase);
+                ApplayModified();
+            }
             if (GUILayout.Button("New"))
             {
                 _waveDatabase.Add(new Wave

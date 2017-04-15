@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Assets.Scripts.ScriptableObject
 {
     [Serializable]
-    public class RoundBarrier : UnityEngine.ScriptableObject
+    public class RoundBarrier
     {
         [SerializeField] private string _roundBarrierName;
         [SerializeField] private List<Segment> _segmentsList;

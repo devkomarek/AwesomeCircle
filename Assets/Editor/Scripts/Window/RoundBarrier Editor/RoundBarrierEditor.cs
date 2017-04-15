@@ -1,6 +1,6 @@
 ﻿#region
 
-using Assets.Editor.Scripts.Database;
+using Assets.Scripts.ScriptableObject.Database;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -13,6 +13,7 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor{
         private const string SEGMENT_DATABASE_NAME = @"SegmentDatabase.asset";
         private const string WAVE_DATABASE_NAME = @"WaveDatabase.asset";
         private const string DATABASE_PATH = @"Editor/Database";
+        private const string DONE_WAVE_DATABASE_PATH = @"Editor/Database/Done";
         private const string DATABASE_PROPERTY_NAME = @"_database";
         private const string WAVE_PROPERTY_NAME = @"_waveName";
         private const string ROUNDBARRIER_PROPERTY_NAME = @"_roundBarrierName";

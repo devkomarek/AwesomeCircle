@@ -13,9 +13,11 @@ namespace Assets.Scripts.GameMaster{
         [SerializeField] private int _numCapVertices;
         [SerializeField] private Gradient _gradient;
         [SerializeField] private float _width;
+        [SerializeField] private float _playerZone;
 
         private GameObject _roundBarrierGameObject;
         private List<Segment> _segmentsList;
+        private List<SegmentController> _segmentControllersList;
         private string _nameRoundBarrier;
 
         #region Properties
@@ -59,29 +61,27 @@ namespace Assets.Scripts.GameMaster{
             get { return _roundBarrierMaterial; }
             set { _roundBarrierMaterial = value; }
         }
+
+        public float PlayerZone
+        {
+            get { return _playerZone; }
+            set { _playerZone = value; }
+        }
         #endregion
 
-        public void CreateRoundBarrier(RoundBarrier roundBarrierData)
+        public void CreateRoundBarrier(RoundBarrier roundBarrierData, int offset)
         {
             GetRoundBarrierData(roundBarrierData);
             CreateGameObjectRoundBarrier();
             CreateOtherElementsRoundBarrier();
-           // StartDrawCircle(roundBarrierData, randomRotation);
+            AddDataToSegmentController(offset);
         }
 
         private void GetRoundBarrierData(RoundBarrier roundBarrierData)
         {
-            //_segmentsList = new List<Segment>();
+            _segmentControllersList = new List<SegmentController>();
             _nameRoundBarrier = roundBarrierData.RoundBarrierName;
             _segmentsList = roundBarrierData.SegmentsList;
-        }
-
-        private void StartDrawCircle(RoundBarrier roundBarrierData, int randomRotation)
-        {
-//            RoundBarrierDraw roundBarrierDraw = _roundBarrierGameObject.GetComponent<RoundBarrierDraw>();
-//            roundBarrierDraw.Speed = Speed;
-//            roundBarrierDraw.StartPosition = StartPosition;
-//            roundBarrierDraw.StartDrawCircle(roundBarrierData, randomRotation);
         }
 
         private void CreateGameObjectRoundBarrier()
@@ -92,7 +92,17 @@ namespace Assets.Scripts.GameMaster{
                 name = _nameRoundBarrier,
                 tag = "RoundBarrier"
             };
-            //_roundBarrierGameObject.AddComponent<RoundBarrierDraw>();
+            _roundBarrierGameObject.AddComponent<RoundBarrierDraw>();
+            _roundBarrierGameObject.GetComponent<RoundBarrierDraw>().SegmentsList = _segmentsList;
+        }
+
+        private void AddDataToSegmentController(int offset)
+        {
+            for (int i = 0; i < _segmentControllersList.Count; i++)
+            {
+                _segmentControllersList[i].StartSegment = _segmentsList[i].Start + offset;
+                _segmentControllersList[i].EndSegment = _segmentsList[i].End;
+            }
         }
 
         private void CreateOtherElementsRoundBarrier()
@@ -100,13 +110,13 @@ namespace Assets.Scripts.GameMaster{
             var tempSegmentsList = _segmentsList.GetRange(0, _segmentsList.Count);
             for (var i = 0; i < tempSegmentsList.Count; i++)
             {
-                var segmentGameObject = ReturnGameObjectSegmentSettingsSetUpInHerarchy(tempSegmentsList[i].TagSegment);
+                var segmentGameObject = ReturnGameObjectSegmentSettingsSetUpInHerarchy("Hit");
 
                 for (var j = 0; j < tempSegmentsList.Count; j++)
                 {
                     if (tempSegmentsList[i].TagSegment == tempSegmentsList[j].TagSegment)
                     {
-                        var barrier = ReturnGameObjectBarrierSetUpInHerarchy(tempSegmentsList[i].TagSegment, segmentGameObject);
+                        var barrier = ReturnGameObjectBarrierSetUpInHerarchy("Hit", segmentGameObject);
                         AddComponentsToGameObject(barrier);
                         if (j != i)
                         {
@@ -142,7 +152,12 @@ namespace Assets.Scripts.GameMaster{
 
         private void AddComponentsToGameObject(GameObject go)
         {
+            go.AddComponent<SegmentController>();
             go.AddComponent<LineRenderer>();
+            _segmentControllersList.Add(go.GetComponent<SegmentController>());
         }
+
+
+
     }
 }

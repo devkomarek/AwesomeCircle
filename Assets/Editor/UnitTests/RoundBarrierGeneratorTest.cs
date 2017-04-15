@@ -24,14 +24,14 @@ namespace Assets.Editor.UnitTests
         [Test]
         public void CreateRoundBarrier_ShouldSetUpRightInHierarchy_WhenTrue()
         {
-            RoundBarrier roundBarrier = ScriptableObject.CreateInstance<RoundBarrier>();
-            List<Segment> segmentsList = new List<Segment> {ScriptableObject.CreateInstance<Segment>()};
+            RoundBarrier roundBarrier = new RoundBarrier();
+            List<Segment> segmentsList = new List<Segment> {new Segment()};
             segmentsList[0].Start = 0;
             segmentsList[0].End = -90;
             segmentsList[0].TagSegment = "Hit";
             roundBarrier.RoundBarrierName = "r-0.0.0";
             roundBarrier.SegmentsList = segmentsList;
-            _roundBarrierGenerator.CreateRoundBarrier(roundBarrier);
+            _roundBarrierGenerator.CreateRoundBarrier(roundBarrier,0);
 
             Assert.AreEqual(GameObject.Find("r-0.0.0").transform.name, "r-0.0.0");
 
