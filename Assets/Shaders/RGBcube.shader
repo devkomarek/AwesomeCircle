@@ -1,4 +1,6 @@
-﻿Shader "Cg shader for RGB cube" { 
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Cg shader for RGB cube" { 
    SubShader { 
       Pass { 
          CGPROGRAM 
@@ -26,7 +28,7 @@
          {
             vertexOutput output; 
  
-            output.pos =  mul(UNITY_MATRIX_MVP, input.vertexPos);
+            output.pos =  UnityObjectToClipPos(input.vertexPos);
 			//output.col = float4(input.texcoord.x,0.0,0.0,1.0);
 			//output.col = float4(0.0,input.texcoord.y,0.0,1.0);
             //output.col = input.texcoord;

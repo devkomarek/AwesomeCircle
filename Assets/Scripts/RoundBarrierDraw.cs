@@ -8,29 +8,10 @@ namespace Assets.Scripts{
     [SerializeField]
     public class RoundBarrierDraw : MonoBehaviour
     {
-        //        [SerializeField]
-        //        private RoundBarrierData _roundBarrierData;
-        //        [SerializeField]
-        //        private float _speed;
-        //        [SerializeField]
-        //        private float _startPosition;
-        //        [SerializeField]
-        //        private List<SegmentData> _segmentsList;
-        //        private List<SegmentData> _settingsList;
-        //        private float _oldSegmentStart;
-        //        private float _width;
-        //        private bool _barrierIsCreated;
-        //        private bool _isCollision;
-        //        public List<List<Vector3>> PositionList = new List<List<Vector3>>();   
-        //        private List<bool> _listRoundBarrierDone = new List<bool>();
-        //        private int _numCapVertices = 0;
-
         private Move _move;
         private float _positionRoundBarrier;
-
-
-
-        public List<Segment> SegmentsList; 
+        public List<Segment> SegmentsList;
+        public bool IsDead = false;
         private RoundBarrierGenerator _roundBarrierGenerator;
         private GM _gm;
 
@@ -40,7 +21,7 @@ namespace Assets.Scripts{
             set { _positionRoundBarrier = value; }
         }
 
-        void Start()
+        private void Start()
         {
             GameObject gameMaster = GameObject.Find("Awesome Circle").transform.FindChild("Game Master").gameObject;
             _roundBarrierGenerator = gameMaster.GetComponent<RoundBarrierGenerator>();
@@ -49,7 +30,8 @@ namespace Assets.Scripts{
             _move = GetComponent<Move>();
             _positionRoundBarrier = _roundBarrierGenerator.StartPosition;
         }
-        void Update()
+
+        private void Update()
         {
             if (SegmentsList != null)
             {
@@ -65,6 +47,7 @@ namespace Assets.Scripts{
                 for (int j = 0; j < transform.GetChild(i).transform.childCount; j++)
                 {
                     LineRenderer lineRenderer = transform.GetChild(i).GetChild(j).GetComponent<LineRenderer>();
+                    if(IsDead == false)
                     lineRenderer.colorGradient = _roundBarrierGenerator.Gradient;
                     lineRenderer.material = _roundBarrierGenerator.RoundBarrierMaterial;
                     lineRenderer.numCapVertices = _roundBarrierGenerator.NumCapVertices;
@@ -78,65 +61,27 @@ namespace Assets.Scripts{
         {
             return Vector3.Distance(collision, Vector3.zero) < _roundBarrierGenerator.PlayerZone;
         }
+
         private void DrawSegments()
         {
-            _positionRoundBarrier -= _roundBarrierGenerator.Speed * Time.deltaTime;
-            for (int i = 0 ; i < transform.childCount; i++)
+            _positionRoundBarrier -= _roundBarrierGenerator.Speed*Time.deltaTime;
+            for (int i = 0; i < transform.childCount; i++)
             {
                 for (int j = 0; j < transform.GetChild(i).childCount; j++)
                 {
                     GameObject segmentGameObject = transform.GetChild(i).GetChild(j).gameObject;
                     SegmentController segmentController = segmentGameObject.GetComponent<SegmentController>();
                     LineRenderer lineRenderer = segmentGameObject.GetComponent<LineRenderer>();
-                    lineRenderer.numPositions = _roundBarrierGenerator.DotConcentration;
-                    _move.Calculate(_positionRoundBarrier, _roundBarrierGenerator.DotConcentration, segmentController, lineRenderer);
-                            if (IsCollision(lineRenderer.GetPosition(0)))
-                                  _gm.EndGame();                             
+                    lineRenderer.positionCount = segmentController.DotConcentration;
+                    _move.Calculate(_positionRoundBarrier, segmentController.DotConcentration, segmentController, lineRenderer);
+                    if (IsCollision(lineRenderer.GetPosition(0)) && IsDead == false)
+                        _gm.EndGame();
+                        // GM.KillRoundBarrier(segmentGameObject);
+
 
                 }
-           
+
             }
         }
-       
-
-        private Gradient ReturnGradient(Gradient g)
-        {
-            GradientColorKey[] gck;
-            GradientAlphaKey[] gak;
-            gck = new GradientColorKey[3];
-            gck[0].color = Color.black;
-            gck[0].time = 0.0F;
-            gck[1].color = Color.white;
-            gck[1].time = 0.5F;
-            gck[2].color = Color.black;
-            gck[2].time = 1.0F;
-            gak = new GradientAlphaKey[4];
-            gak[0].alpha = 0.0F;
-            gak[0].time = 0.0F;
-            gak[1].alpha = 1.0F;
-            gak[1].time = 0.2F;
-            gak[2].alpha = 1.0F;
-            gak[2].time = 0.8F;
-            gak[3].alpha = 0.0F;
-            gak[3].time = 1.0F;
-            g.SetKeys(gck, gak);
-            return g;
-        }
-
-        #region Events
-//        void OnDestroy()
-//        {
-//            Resources.Load<RoundBarrierDatabase>("RoundDatabase").Remove(RoundBarrierData);
-//            if (Time.frameCount % 30 == 0)
-//            {
-//                System.GC.Collect();
-//            }
-//        }
-//        public void OnUpdated(object source, EventArgs eventArgs)
-//        {
-//            CreateSettingsList();
-//            SetUpPropertiesInGameObject();
-//        }
-        #endregion
     }
 }

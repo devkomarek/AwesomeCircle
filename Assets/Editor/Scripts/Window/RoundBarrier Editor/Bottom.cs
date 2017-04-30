@@ -11,6 +11,10 @@ namespace Assets.Editor.Scripts.Window.RoundBarrier_Editor
     {
         private void BottomWaveBar()
         {
+            if (GUILayout.Button("Load"))
+            {
+                PopupWindow.Show(new Rect(), new LoadRoundWave());
+            }
             if (GUILayout.Button("Save"))
             {
                 WaveDatabase doneWaveDatabase = WaveDatabase.GetDatabase<WaveDatabase>(DONE_WAVE_DATABASE_PATH, WAVE_DATABASE_NAME);

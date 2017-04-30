@@ -14,6 +14,12 @@ namespace Assets.Scripts.GameMaster{
         {
             _timerText = GameObject.Find("Awesome Circle").transform.FindChild("UI").FindChild("Timer").FindChild("Text").GetComponent<Text>();
         }
+
+        void Update()
+        {
+            UpdateTime();
+        }
+
         public string CourentTime
         {
             get { return _courentTime; }
@@ -34,12 +40,7 @@ namespace Assets.Scripts.GameMaster{
 
         public float GetFloatTime()
         {
-            return Saver.ConvertTimeToFloat(_courentTime);
-        }
-
-        void Update()
-        {
-            UpdateTime();
+            return GameManager.ConvertTimeToFloat(_courentTime);
         }
 
         private void UpdateTime()

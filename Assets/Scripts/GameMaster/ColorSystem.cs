@@ -7,17 +7,17 @@ namespace Assets.Scripts.GameMaster
     {
 
         public Color CurrentColor;
-        public Image ButtonImage1;
-        public Image ButtonImage2;
-        public Image SmallCircleImage1;
-        public Image SmallCircleImage2;
-        public Image BigCircleImage;
+        public Image[] Images;
+        public Text[] Texts;
+        private Gradient _laserGradient;
         private Light _light;
         private Gradient _gradient;
+        
         // Use this for initialization
         void Start ()
         {
             _light = GameObject.Find("Awesome Circle").transform.FindChild("Plane").FindChild("Point light").GetComponent<Light>();
+            _laserGradient = GameObject.Find("Awesome Circle").transform.FindChild("Hero").GetComponent<Hero>().LaserGradient;
             _gradient = GetComponent<RoundBarrierGenerator>().Gradient;
         }
 	
@@ -30,30 +30,26 @@ namespace Assets.Scripts.GameMaster
 
         private void UpdateColor()
         {
-            ButtonImage1.color = CurrentColor;
-            ButtonImage2.color = CurrentColor;
-            SmallCircleImage1.color = CurrentColor;
-            SmallCircleImage2.color = CurrentColor;
-            BigCircleImage.color = CurrentColor;
+            foreach (var image in Images)
+            {
+                image.color = CurrentColor;
+            }
+            foreach (var text in Texts)
+            {
+                text.color = CurrentColor;
+            }
             Gradient(_gradient);
+            Gradient(_laserGradient);
         }
 
         private void Gradient(Gradient g)
-        {
-            
+        {            
             GradientColorKey[] gck = g.colorKeys;
-            GradientAlphaKey[] gak = g.alphaKeys;
             gck[0].color = CurrentColor;
             gck[0].time = 0.0F;
             gck[1].color = CurrentColor;
             gck[1].time = 1F;
-
-
-            gak[0].alpha = 1.0F;
-            gak[0].time = 0.0F;
-            gak[1].alpha = 1.0F;
-            gak[1].time = 1F;
-            g.SetKeys(gck, gak);
+            g.colorKeys = gck;
         }
     }
 }

@@ -17,16 +17,18 @@ namespace Assets.Scripts
 	
         // Update is called once per frame
         void Update () {
-            foreach (var touch in Input.touches)
+            if (Input.touchCount != 0)
             {
-                if (touch.phase == TouchPhase.Began)
+                foreach (var touch in Input.touches)
                 {
-                    Ray ray = _cam.ScreenPointToRay(touch.position);              
-                    PointsList.Add(ray.GetPoint(0));
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        Ray ray = _cam.ScreenPointToRay(touch.position);
+                        PointsList.Add(ray.GetPoint(0));
 
+                    }
                 }
             }
-    
         }
     }
 }

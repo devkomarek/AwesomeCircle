@@ -1,16 +1,16 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.GameMaster;
+using UnityEngine;
 
 namespace Assets.Scripts
 {
     public class Gun : MonoBehaviour{
-        private ParticleSystem _boomEffect;
-        private AudioController _audioController;
         public float EnoughAmmo;
         public float Ammo;
         [SerializeField]private float _minAmmo;
         [SerializeField]private float _powerShot;
         [SerializeField]private bool _isOverloaded;
         [SerializeField]private float _multipleRecovery;
+        private GM _gm;
         private float _maxAmmo;
         public float MultipleCooling
         {
@@ -39,21 +39,17 @@ namespace Assets.Scripts
         void Start ()
         {
             _maxAmmo = Ammo;
-            _boomEffect = transform.FindChild("Overload Gun").FindChild("BoomEffect").GetComponent<ParticleSystem>();
-            _audioController = GameObject.Find("Awesome Circle").transform.FindChild("Audio").GetComponent<AudioController>();
+            _gm = GameObject.Find("Awesome Circle").transform.FindChild("Game Master").GetComponent<GM>();
         }
 	
         void Update ()
         {
             Ammo += Time.deltaTime * _multipleRecovery;
             CheckAmmo();
-            ResizeOverloadGun();
             if (IsEmpty())
             {
-                _isOverloaded = true;
-                _boomEffect.time = 0;
-                _boomEffect.Play();
-                _audioController.OverloadPlay();
+                _isOverloaded = true;                
+                _gm.OverloadEffect();
             }else if (Ammo > EnoughAmmo)
             {
                 _isOverloaded = false;
@@ -62,10 +58,6 @@ namespace Assets.Scripts
                 Ammo += Time.deltaTime * _multipleRecovery*4;
         }
 
-        private void ResizeOverloadGun()
-        {
-            transform.FindChild("Overload Gun").localScale = new Vector3(Ammo, Ammo, 0.1f);
-        }
 
         private bool IsEmpty()
         {

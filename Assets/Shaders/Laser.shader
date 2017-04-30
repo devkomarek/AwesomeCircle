@@ -1,4 +1,6 @@
-﻿Shader "Hero/Laser"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Hero/Laser"
 {
 	Properties
 	{
@@ -53,21 +55,8 @@
 			{
 				v2f o;
                 o.uv = TRANSFORM_TEX (v.uv, _MainTex);  
-                
-                // float4 vMVP = mul(UNITY_MATRIX_MVP, v.vertex);
-                // float4 otherPos = float4(v.normal.xyz, 1.0);
-                // float4 otherMVP = mul(UNITY_MATRIX_MVP, otherPos);
-				// float scaledLineWidth = _LineWidth * _LineScale;
 
-                // float2 lineDirProj = scaledLineWidth * normalize((vMVP.xy/vMVP.w) - (otherMVP.xy/otherMVP.w));
-
-				// vMVP.x = vMVP.x + lineDirProj.x * v.texcoord1.x + lineDirProj.y * v.texcoord1.y;
-				// vMVP.y = vMVP.y + lineDirProj.y * v.texcoord1.x - lineDirProj.x * v.texcoord1.y;
-				// o.vertex = vMVP;
-				// o.col = v.col;
-                // return o;
-
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);	
+				o.vertex = UnityObjectToClipPos(v.vertex);	
 
 				o.col = v.col	;		
 				return o;
@@ -89,9 +78,6 @@
                 {
                 	return tex * _Color; 
                 }
-			//	float4 col = tex2D(_MainTex, i.uv + disp) * i.col;
-				//float4 col = float4(0,1,1,1);
-				//return col;
 			}
 			ENDCG
 		}

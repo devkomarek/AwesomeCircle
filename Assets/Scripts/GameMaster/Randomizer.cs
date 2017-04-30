@@ -10,11 +10,17 @@ using Random = UnityEngine.Random;
 namespace Assets.Scripts.GameMaster{
     public class Randomizer : MonoBehaviour
     {
+        public int HalfIncriserSpeedLvl1;
+        public int HalfIncriserSpeedLvl2;
+        public int HalfIncriserSpeedLvl3;
+        public int HalfIncriserSpeedLvl4;
+        public int HalfIncriserSpeedLvl5;
+
         public float BetweenRoundBarrierTime;
         public float MinBetweenWavetime;
         public float MaxBetweenWavetime;
         private const int HALF_CHAPTER = 1800;
-        private const int THIRD_END_CHAPTER = 3600;       
+        private const int THIRD_END_CHAPTER = 3600;     
         private WaveDatabase _waveDatabase;
         private RoundBarrierGenerator _roundBarrierGenerator;
         private Wave _readyWave;
@@ -25,7 +31,7 @@ namespace Assets.Scripts.GameMaster{
         private void Start()
         {
             _gameInfo = GetComponent<GameInfo>();
-            _roundBarrierGenerator = GetComponent<RoundBarrierGenerator>();
+            _roundBarrierGenerator = GetComponent<RoundBarrierGenerator>();         
         }
 
         private void Update()
@@ -33,7 +39,8 @@ namespace Assets.Scripts.GameMaster{
             if (_triger && _pullRoundBarrierIsActive == false)
             {      
                  
-                ChangeWaveDatabaseDependingAtTime();      
+                ChangeWaveDatabaseDependingAtTime();
+                ChangeSpeedDependingAtTime();
                 PrepareWave();
                 PullRoundBarrier();
             }
@@ -41,6 +48,7 @@ namespace Assets.Scripts.GameMaster{
 
         public void SetUpWaveDatabase(int lvl)
         {
+            _waveDatabase = null;
             _waveDatabase = LoadResources(_waveDatabase, "LvL"+lvl+"/lvl0/WaveDatabase");
             if (_waveDatabase == null)
                 throw new Exception("WaveDatabase must be not null!");
@@ -50,6 +58,7 @@ namespace Assets.Scripts.GameMaster{
 
         public void Disable()
         {
+            _waveDatabase = null;
             _triger = false;
         }
 
@@ -62,27 +71,66 @@ namespace Assets.Scripts.GameMaster{
             }
         }
 
-        private int _courentChapter = -1;
+        private int _courentChapterForDatabase = -1;
         private void ChangeWaveDatabaseDependingAtTime()
         {
             float courentTime = _gameInfo.GetFloatTime();
-            if (_courentChapter != 0 &&courentTime > 0 && courentTime < HALF_CHAPTER)
+            if (_courentChapterForDatabase != 0 &&courentTime > 0 && courentTime < HALF_CHAPTER)
             {
                 _waveDatabase = null;
                 _waveDatabase = LoadResources(_waveDatabase, "LvL" + _gameInfo.Lvl + "/lvl0/WaveDatabase");
-                _courentChapter = 0;
+                _courentChapterForDatabase = 0;
             }
-            else if (_courentChapter != 1 && courentTime > HALF_CHAPTER && courentTime < THIRD_END_CHAPTER)
+            else if (_courentChapterForDatabase != 1 && courentTime > HALF_CHAPTER && courentTime < THIRD_END_CHAPTER)
             {
                 _waveDatabase = null;
                 _waveDatabase = LoadResources(_waveDatabase, "LvL" + _gameInfo.Lvl + "/lvl1/WaveDatabase");
-                _courentChapter = 1;
+                _courentChapterForDatabase = 1;
             }               
-            else if (_courentChapter != 2 && courentTime > THIRD_END_CHAPTER)
+            else if (_courentChapterForDatabase != 2 && courentTime > THIRD_END_CHAPTER)
             {
                 _waveDatabase = null;
                 _waveDatabase = LoadResources(_waveDatabase, "LvL" + _gameInfo.Lvl + "/lvl2/WaveDatabase");
-                _courentChapter = 2;
+                _courentChapterForDatabase = 2;
+            }
+                
+        }
+
+        private int _courentChapterForSpeed = -1;
+        private void ChangeSpeedDependingAtTime()
+        {
+            float courentTime = _gameInfo.GetFloatTime();
+            if (_courentChapterForSpeed != 1 && courentTime > HALF_CHAPTER && courentTime < THIRD_END_CHAPTER)
+            {
+                switch (_gameInfo.Lvl)
+                {
+                    case 1:
+                        _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / HalfIncriserSpeedLvl1;
+                        break;
+                    case 2:
+                        _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / HalfIncriserSpeedLvl2;
+                        break;
+                    case 3:
+                        _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / HalfIncriserSpeedLvl3;
+                        break;
+                    case 4:
+                        _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / HalfIncriserSpeedLvl4;
+                        break;
+                    case 5:
+                        _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / HalfIncriserSpeedLvl5;
+                        break;
+                }
+                _courentChapterForSpeed = 1;
+            }
+            else if (_courentChapterForSpeed == 1 && courentTime > THIRD_END_CHAPTER)
+            {
+                _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed*1/6;
+                _courentChapterForSpeed = 7;
+            }
+            else if (courentTime > THIRD_END_CHAPTER+600 && (int)((courentTime - 600) / 600) >= _courentChapterForSpeed)
+            {
+                _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / _courentChapterForSpeed + 4;
+                _courentChapterForSpeed += 2;
             }
                 
         }
@@ -101,12 +149,13 @@ namespace Assets.Scripts.GameMaster{
 
         private IEnumerator WaitBetween(Action doLast)
         {
-            var times = ReturnTimeBetweenRoundBarrierList(_readyWave);
-            for (var i = 0; i < times.Count; i++)
+            var time = _readyWave.TimeBetweenRoundBarriers;
+            for (var i = 0; i < _readyWave.RoundBarriersList.Count -1; i++)
             {
-                if (i == 0)               
+                if (i == 0 && _triger)               
                     _roundBarrierGenerator.CreateRoundBarrier(_readyWave.RoundBarriersList[0], _randomOffset);                             
-                    yield return new WaitForSeconds(float.Parse(times[i]) + BetweenRoundBarrierTime);
+                    yield return new WaitForSeconds(BetweenRoundBarrierTime + float.Parse(time));
+                if(_triger)
                 _roundBarrierGenerator.CreateRoundBarrier(_readyWave.RoundBarriersList[i+1],_randomOffset);
             }
             doLast();

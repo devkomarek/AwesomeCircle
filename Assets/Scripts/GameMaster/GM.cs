@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Assets.Scripts.ScriptableObject.Database;
 using UnityEngine;
+using UnityEngine.Assertions.Comparers;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.GameMaster{
@@ -12,18 +14,20 @@ namespace Assets.Scripts.GameMaster{
 
         public static GM Gm;
         public static WaitForSeconds ShootDuration = new WaitForSeconds(.07f);
-        public static float DeltaTime;
         public bool TestMode = false;
         private static bool _gameHasEnded = false;
         public Animator AwesomeCircleAnimator;
         public Animator LightAnimator;
 
+        private RoundBarrierGenerator _roundBarrierGenerator;
         private AudioController _audioController;
         private Text _lvlText;
         private GameObject _smallCircle1;
         private GameObject _smallCircle2;
+        private GameObject _bigCircle;
         private GameInfo _gameInfo;
         private Randomizer _randomizer;
+        private LvlManager _lvlManager;
         private Timer _timer;
         private Text _timerText;
         private GameObject _overloadGun;
@@ -36,56 +40,111 @@ namespace Assets.Scripts.GameMaster{
         private Image _lockImage;
         private Animator _nextLvlAnimator;
         private Text _nextLvlText;
-        private RoundBarrierGenerator _roundBarrierGenerator;
+        private SoundVisualizer _soundVisualizer;
+        private CameraRay _cameraRay;
+        private Animator _animatorAwesome;
+        private bool _gameStart = false;
+        private CameraImageEffect _cameraImageEffect;
+        private GameObject _bassCylinder;
+        private CameraShake _cameraShake;
+        private GameObject _mainCamera;
         private void Start()
         {
             GameObject awesomeCircle = GameObject.Find("Awesome Circle");
             GameObject ui = awesomeCircle.transform.FindChild("UI").gameObject;
             _roundBarrierGenerator = GetComponent<RoundBarrierGenerator>();
+            _mainCamera = awesomeCircle.transform.FindChild("Main Camera").gameObject;
+            _bassCylinder = awesomeCircle.transform.FindChild("Hero").FindChild("Bass cylinder").gameObject;
+            _cameraImageEffect = awesomeCircle.transform.FindChild("Main Camera").GetComponent<CameraImageEffect>();
             _nextLvlAnimator = ui.transform.FindChild("Next_lvl").GetComponent<Animator>();
             _nextLvlText = ui.transform.FindChild("Next_lvl").FindChild("Text").GetComponent<Text>();
             _audioController = awesomeCircle.transform.FindChild("Audio").GetComponent<AudioController>();
+            _soundVisualizer = awesomeCircle.transform.FindChild("Audio").GetComponent<SoundVisualizer>();
             _lvlText = ui.transform.FindChild("Lvl").FindChild("Text").GetComponent<Text>();
-            _smallCircle1 = ui.transform.FindChild("Big_circle").transform.FindChild("Small_circle").gameObject;
-            _smallCircle2 = ui.transform.FindChild("Big_circle").transform.FindChild("Small_circle (1)").gameObject;
+            _bigCircle = ui.transform.FindChild("Big_circle").gameObject;
+            _smallCircle1 = _bigCircle.transform.FindChild("Small_circle").gameObject;
+            _smallCircle2 = _bigCircle.transform.FindChild("Small_circle (1)").gameObject;
             _timerText = ui.transform.FindChild("Timer").transform.FindChild("Text").gameObject.GetComponent<Text>();
             _gameInfo = GetComponent<GameInfo>();
             _randomizer = GetComponent<Randomizer>();
+            _lvlManager = GetComponent<LvlManager>();
             _timer = ui.gameObject.GetComponent<Timer>();
-            _overloadGun = awesomeCircle.transform.FindChild("Hero").transform.FindChild("Overload Gun").gameObject;
             _hero = awesomeCircle.transform.FindChild("Hero").GetComponent<Hero>();
             _best = ui.gameObject.transform.Find("Best").GetComponentInChildren<Text>();
-            _heroGameObject = awesomeCircle.transform.FindChild("Hero").gameObject;         
-            _overloadGun.SetActive(false);
+            _heroGameObject = awesomeCircle.transform.FindChild("Hero").gameObject;
+            _cameraRay = awesomeCircle.transform.FindChild("Main Camera").GetComponent<CameraRay>();
+            _animatorAwesome = ui.transform.FindChild("Awesome").GetComponent<Animator>();
+            _cameraShake = GetComponent<CameraShake>();
             _heroGameObject.SetActive(false);
-            _best.text = Saver.GetTimeBest(1);
-
+            _best.text = GameManager.GetTimeBest(1);
         }
+
+        private bool _isFirstAwesome = true;
         private void Update()
         {
-            DeltaTime = Time.deltaTime;
+            if(_gameInfo.Lvl == 5 && _timer.Seconds >= 60 && GameManager.IsEnd() == false)
+                TheEnd();
+            if (_timer.Seconds >= 60 && _isFirstAwesome && _gameStart)
+            {
+                _animatorAwesome.SetTrigger("Show");
+                _isFirstAwesome = false;
+            }
         }
 
-        public static void KillRoundBarrier(GameObject rb)
+        public void KillRoundBarrier(GameObject rb)
         {
-            Destroy(rb.gameObject);
+            if (rb.transform.parent.childCount <= 1)
+            {
+                StartCoroutine(AnimateDeadBarrier(rb.GetComponent<LineRenderer>(), rb.transform.parent.parent.gameObject));
+                rb.transform.parent.parent.gameObject.tag = "Dead";
+            }
+            else
+            {
+                StartCoroutine(AnimateDeadBarrier(rb.GetComponent<LineRenderer>(), rb));
+                if (rb.transform.parent.childCount <= 1)
+                {
+                    StartCoroutine(AnimateDeadBarrier(rb.GetComponent<LineRenderer>(), rb.transform.parent.parent.gameObject));
+                    rb.transform.parent.parent.gameObject.tag = "Dead";
+                }
+
+            }                
+        }
+
+        private IEnumerator AnimateDeadBarrier(LineRenderer lr, GameObject gO)
+        {
+            Color startColor = lr.endColor;
+            Color endColor = startColor.linear;
+            float elapsedTime = 0.0f;
+            float totalTime = 0.05f;
+            while (elapsedTime < totalTime)
+            {
+                elapsedTime += Time.deltaTime;
+                float courentTime = elapsedTime/totalTime;
+                lr.startColor = Color.Lerp(startColor, endColor, courentTime);
+                lr.endColor = lr.startColor;
+                yield return null;
+            }
+            Destroy(gO);
         }
 
         public void EndGame()
         {
             if(_gameHasEnded)
                 return;
+            _randomizer.Disable();
+            _bassCylinder.SetActive(false);
+            _gameStart = false;
+            _isRestart = false;
             SetActivite(false);
-           FreezAllRoundBarriers();
-            _audioController.StopLvlPlay();
+            _lvlManager.FreezAllRoundBarriers();
             
           SetTriggers("EndGame");
             
             string actualTime = _timerText.text;
-           if (Saver.GetFloatBest(_gameInfo.Lvl) < Saver.ConvertTimeToFloat(actualTime))
-                Saver.SetBest(_gameInfo.Lvl, actualTime);
+           if (GameManager.GetFloatBest(_gameInfo.Lvl) < GameManager.ConvertTimeToFloat(actualTime))
+                GameManager.SetBest(_gameInfo.Lvl, actualTime);
 
-            _best.text = Saver.GetTimeBest(_gameInfo.Lvl);
+            _best.text = GameManager.GetTimeBest(_gameInfo.Lvl);
             _audioController.StopLvlPlay();
         }
 
@@ -102,58 +161,125 @@ namespace Assets.Scripts.GameMaster{
 
         private void StartLvl(int lvl)
         {
-            if(Saver.ReturnNameLvl(lvl) == "Lock") return;
+            if(GameManager.ReturnNameLvl(lvl) == "Lock") return;
+            _smallCircle2.transform.FindChild("Lock").GetComponent<Image>().enabled = false;
+            _smallCircle1.transform.FindChild("Lock").GetComponent<Image>().enabled = false;
+            _bassCylinder.SetActive(true);
+            _cameraImageEffect.enabled = true;
             SetTriggers("StartGame");
+            _isFirstAwesome = true;
             _nextLvlAnimator.SetTrigger("Hide");
-            _gameInfo.LvlName = Saver.ReturnNameLvl(lvl);
+            _gameInfo.LvlName = GameManager.ReturnNameLvl(lvl);
             
             _audioController.StartLvlPlay();
             _gameInfo.Lvl = lvl;
             _timer.MinusTime = Time.time;
             _randomizer.SetUpWaveDatabase(lvl);
-            _lvlText.text = "Lvl " + _gameInfo.LvlName;
-            UnFreezAllRoundBarriers();
+            _lvlText.text = _gameInfo.LvlName;
+            _lvlManager.UnFreezAllRoundBarriers();
+            _lvlManager.SetUpLvl(_gameInfo.Lvl);
+            _cameraRay.PointsList.Clear();
             _heroGameObject.SetActive(true);
+            _gameStart = true;
             if(TestMode == false)
             SetActivite(true);
-
         }
 
         public void BackToMenu()
         {
-          SetTriggers("BackToMenu");
+            _cameraImageEffect.enabled = false;
+            StartCoroutine(BackEffect());
             SetActivite(false);
             _heroGameObject.SetActive(false);
-           
             DestroyAllRoundBarriers();
-            _smallCircle1.transform.FindChild("lvl_name").GetComponent<Text>().text = Saver.LVL_1;
-            _smallCircle1.transform.FindChild("lvl_text").GetComponent<Text>().text = LVL_IN_CIRCLE + "1";
-            _smallCircle2.transform.FindChild("lvl_name").GetComponent<Text>().text = Saver.LVL_1;
-            _smallCircle2.transform.FindChild("lvl_text").GetComponent<Text>().text = LVL_IN_CIRCLE + "1";
-            _best.text = Saver.GetTimeBest(1);
-             _smallCircle1InTop = true;
-             _previousState = 0;
-    }
-
-        public void RestartLvl()
-        {
-            _audioController.RestartLvlPlay();
-            AwesomeCircleAnimator.SetTrigger("Lvl_" + _gameInfo.Lvl);
-            SetTriggers("RestartLvl");          
-
-            DestroyAllRoundBarriers();
-            _randomizer.SetUpWaveDatabase(_gameInfo.Lvl);
-            SetActivite(true);
-            _timer.MinusTime = Time.time;
-            UnFreezAllRoundBarriers();
+            _smallCircle1.transform.FindChild("lvl_name").GetComponent<Text>().text = GameManager.ReturnNameLvl(_gameInfo.Lvl);
+            _smallCircle1.transform.FindChild("lvl_text").GetComponent<Text>().text = LVL_IN_CIRCLE + _gameInfo.Lvl;
+            _smallCircle2.transform.FindChild("lvl_name").GetComponent<Text>().text = GameManager.ReturnNameLvl(_gameInfo.Lvl);
+            _smallCircle2.transform.FindChild("lvl_text").GetComponent<Text>().text = LVL_IN_CIRCLE + _gameInfo.Lvl;
+            _best.text = GameManager.GetTimeBest(_gameInfo.Lvl);
+            GC.Collect();
 
         }
 
-        public static IEnumerator ShootEffect(LineRenderer lr)
+        private bool _isRestart = false;
+        public void RestartLvl()
+        {
+            if (_isRestart == false)
+            {
+                GC.Collect();
+                _bassCylinder.SetActive(true);
+                _gameInfo.CourentTime = "Time  00:00";
+                SetActivite(true);
+
+                _audioController.RestartLvlPlay();
+                AwesomeCircleAnimator.SetTrigger("Lvl_" + _gameInfo.Lvl);
+                SetTriggers("RestartLvl");
+
+                DestroyAllRoundBarriers();
+                _randomizer.SetUpWaveDatabase(_gameInfo.Lvl);
+
+                _timer.MinusTime = Time.time;
+                _lvlManager.UnFreezAllRoundBarriers();
+                _isRestart = true;
+            }
+            _cameraRay.PointsList.Clear();
+        }
+
+        private bool _isShowCredit;
+        public void ShowCredit()
+        {
+            if (_isShowCredit == false)
+            {
+                AwesomeCircleAnimator.SetTrigger("ShowCredit");
+                _isShowCredit = true;
+            }
+
+        }
+
+        public void HideCredit()
+        {           
+            if (_isShowCredit)
+            {
+                _isShowCredit = false;
+                AwesomeCircleAnimator.SetTrigger("HideCredit");
+                if (_gameInfo.LvlName.Substring(0, 4) == "Lock")
+                    AwesomeCircleAnimator.SetTrigger("Lvl_" + _gameInfo.Lvl + "_gray");
+                else
+                    AwesomeCircleAnimator.SetTrigger("Lvl_" + _gameInfo.Lvl);
+            }
+        }
+
+        public void ShootEffect(LineRenderer lr)
+        {
+            StartCoroutine(Effect(lr));
+        }
+
+        public IEnumerator Effect(LineRenderer lr)
         {
             lr.enabled = true;
-            yield return ShootDuration;
+            yield return new WaitForSeconds(.05f);
             lr.enabled = false;
+        }
+
+        public IEnumerator BackEffect()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                if (i == 0)
+                {
+                    if (_gameInfo.Lvl == 2 || _gameInfo.Lvl == 4)
+                        SetTriggers("BackToMenuEven");
+                    else
+                        SetTriggers("BackToMenuOdd");
+                }
+                yield return new WaitForSeconds(.05f);
+                if (AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Back To Menu Even") ||
+                    AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Back To Menu Odd"))
+                {
+                    SetTriggers("Lvl_" + _gameInfo.Lvl);
+                    i += 100;
+                }
+            }
         }
 
         private void SetTriggers(string trigger)
@@ -166,16 +292,33 @@ namespace Assets.Scripts.GameMaster{
         {
             _randomizer.enabled = b;
             _timer.enabled = b;
-            _overloadGun.SetActive(b);
             _gameHasEnded = !b;
             _hero.enabled = b;
+            
         }
 
         public void OverloadEffect()
         {
-            
+            _audioController.OverloadPlay();
+            StartCoroutine(CameraShakeEffect());
         }
-        
+
+        IEnumerator CameraShakeEffect()
+        {
+            AwesomeCircleAnimator.enabled = false;
+            _cameraShake.enabled = true;
+            while (_cameraShake.shakeDuration > 0.01)
+            {
+                yield return null;
+            }
+            _cameraShake.enabled = false;
+            _cameraShake.shakeDuration = 0.7f;
+            _mainCamera.transform.position = new Vector3(0,0,-126.6f); //todo do poprawienia
+            AwesomeCircleAnimator.enabled = true;
+        }
+
+
+
         public void DestroyAllRoundBarriers()
         {
             foreach (var gm in GameObject.FindGameObjectsWithTag("RoundBarrier"))
@@ -184,21 +327,12 @@ namespace Assets.Scripts.GameMaster{
             }
         }
 
-        public void FreezAllRoundBarriers()
-        {
-            _roundBarrierGenerator.Speed = 0;
-        }
-
-        public void UnFreezAllRoundBarriers()
-        {
-            _roundBarrierGenerator.Speed = 10;
-        }
-
         private void Swipe(string direction)
         {
             for (int i = 1; i < 6; i++)
             {
-                if (AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Lvl " + i + " Menu") ||
+                if (AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Lvl " + i + " Menu") &&
+                     _previousState != i ||
                     AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Lvl " + i +" Gray") &&
                     _previousState != i)
                 {
@@ -226,7 +360,7 @@ namespace Assets.Scripts.GameMaster{
                         if (direction == "Left")
                         {
                             _audioController.SwipeLeftPlay();
-                            _gameInfo.LvlName = Saver.ReturnNameLvl(i - 1);
+                            _gameInfo.LvlName = GameManager.ReturnNameLvl(i - 1);
                             _gameInfo.Lvl = i - 1;
                             _nextLvlText.text = ReturnNextLvlAtSeconds(i -1);
                         }
@@ -234,15 +368,16 @@ namespace Assets.Scripts.GameMaster{
                         if (direction == "Right")
                         {
                             _audioController.SwipeRightPlay();
-                            _gameInfo.LvlName = Saver.ReturnNameLvl(i + 1);
+                            _gameInfo.LvlName = GameManager.ReturnNameLvl(i + 1);
                             _gameInfo.Lvl = i + 1;
                             _nextLvlText.text = ReturnNextLvlAtSeconds(i + 1);
                         }
                         lvlName.text = _gameInfo.LvlName;
                         lvlText.text = LVL_IN_CIRCLE + _gameInfo.Lvl;
-                        _best.text = Saver.GetTimeBest(_gameInfo.Lvl);
+                        _best.text = GameManager.GetTimeBest(_gameInfo.Lvl);
                         TurnImageLock();
                         _previousState = i;
+                        
 
                     }
 
@@ -253,7 +388,7 @@ namespace Assets.Scripts.GameMaster{
 
         private void TurnImageLock()
         {
-            if (_gameInfo.LvlName == "Lock")
+            if (_gameInfo.LvlName.Substring(0,4) == "Lock")
             {
                 _lockImage.enabled = true;
             }
@@ -279,8 +414,16 @@ namespace Assets.Scripts.GameMaster{
         {
             if (direction == "Right")
             {
-                if (Saver.LvlIsLock(lvl + 1))
-                    SetTrigerToRightGray();
+                if (GameManager.LvlIsLock(lvl + 1))
+                {
+                    if (lvl + 1 == 6)
+                    {
+                        AwesomeCircleAnimator.SetTrigger("RightGray");
+                        return;
+                    }                      
+                    else
+                        SetTrigerToRightGray();
+                }
                 else
                 {
                     SetTriggers("Swipe" + direction);
@@ -288,12 +431,12 @@ namespace Assets.Scripts.GameMaster{
             }
             if (direction == "Left")
             {
-                if (Saver.LvlIsLock(lvl - 1))
+                if (GameManager.LvlIsLock(lvl - 1))
                 {
                     switch (lvl - 1)
                     {
                         case 0:
-                            SetTriggers("Swipe" + direction);
+                            AwesomeCircleAnimator.SetTrigger("Swipe" + direction);
                             break;
                         case 1:
                             if (AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Lvl " + lvl + " Gray"))
@@ -340,21 +483,40 @@ namespace Assets.Scripts.GameMaster{
             _audioController.LockLvlPlay();
         }
 
+        private string _previousNextLevelName = "Next level at 10 seconds";
         private string ReturnNextLvlAtSeconds(int lvl)
         {
-            if (Saver.GetFloatBest(lvl) >= 3600)
+            if (GameManager.GetFloatBest(lvl) >= 3600)
             {
                 _nextLvlAnimator.SetTrigger("Hide");
-                return "Next level at 10 seconds";
+                return _previousNextLevelName;
             }
-            string time = Saver.GetTimeBest(lvl);
+            string time = GameManager.GetTimeBest(lvl);
             string ss = time.Substring(time.Length - 5,2);
             int s = int.Parse(ss);
             if(s == 0)
                 _nextLvlAnimator.SetTrigger("Hide");
             else
                 _nextLvlAnimator.SetTrigger("Show");
-            return "Next level at " + (60 - s).ToString() + " " + "seconds";
+            if(lvl == 5)
+                _previousNextLevelName = "End Game at " + (60 - s).ToString() + " " + "seconds";
+            else
+                _previousNextLevelName = "Next level at " + (60 - s).ToString() + " " + "seconds";
+            return _previousNextLevelName;
+        }
+
+
+        public void TheEnd()
+        {
+            GameManager.TheEnd();
+            _audioController.EndAppPlay();
+            _soundVisualizer.TheEnd();
+            _timer.TheEnd();
+            _randomizer.Disable();
+            DestroyAllRoundBarriers();
+            _lvlManager.FreezAllRoundBarriers();
+            GameManager.SetBest(_gameInfo.Lvl, _timerText.text);
+            SetTriggers("TheEnd");
         }
     }
 }

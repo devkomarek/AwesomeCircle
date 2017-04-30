@@ -1,4 +1,6 @@
-﻿Shader "Hidden/OverloadGun"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Hidden/OverloadGun"
 {
 	Properties
 	{
@@ -43,7 +45,7 @@
 
 			
 			//	o.uv = v.uv + offset * 20;
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
 				o.col = v.col;
 				return o;

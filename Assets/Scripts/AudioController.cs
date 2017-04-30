@@ -8,6 +8,12 @@ namespace Assets.Scripts
 {
     public class AudioController : MonoBehaviour
     {
+        private const string AUDIO_SOURCE_LVL_1 = "Open Hexagon - Apeirogon - Milky Ways";
+        private const string AUDIO_SOURCE_LVL_2 = "Open Hexagon - Baby Steps - Dr Finkel Fracken";
+        private const string AUDIO_SOURCE_LVL_3 = "Open Hexagon - Flattering Shape - Starship Showdown";
+        private const string AUDIO_SOURCE_LVL_4 = "Open Hexagon - Pi - 3.1415 - Call Me Katla";
+        private const string AUDIO_SOURCE_LVL_5 = "Open Hexagon - Second Dimension - Maze Of Mayonnaise";
+
         public AudioMixer MasterLvl;
         public AudioMixer Master;
         private AudioSource[] _audioSources;
@@ -21,6 +27,10 @@ namespace Assets.Scripts
         private AudioSource _endGameSource;
         private AudioSource _overloadSource;
         private AudioMixerSnapshot _courentAudioMixerSnapshot;
+        private AudioClip _bufferClip;
+
+        public delegate void Load();
+        public event Load WasLoad;
 
         public AudioSource CourentSource { get; set; }
 
@@ -41,7 +51,7 @@ namespace Assets.Scripts
 
         public void StartLvlPlay()
         {
-            SetUpCourentAudio();    
+            SetUpCourentAudio();
             CurentSourcePlay();
             _soundVisual.SmoothSpeed = 7.0f;
         }
@@ -78,7 +88,7 @@ namespace Assets.Scripts
 
         private IEnumerator AudioEffect()
         {
-            _soundVisual.SmoothSpeed =  -12.0f;
+            _soundVisual.SmoothSpeed =  -28.0f;
             _overloadSnapshot.TransitionTo(0.14f);
             yield return new WaitForSeconds(.25f);
             Master.FindSnapshot("Snapshot").TransitionTo(1f);
@@ -133,7 +143,11 @@ namespace Assets.Scripts
             foreach (AudioSource audioSource in _audioSources)
             {
                 if (audioSource.name == "Lvl " + _gameInfo.Lvl)
+                {
+                    audioSource.clip = Resources.Load<AudioClip>("Audio/" + ReturnNameAudio(_gameInfo.Lvl));
                     CourentSource = audioSource;
+                }
+
             }
             if (CourentSource == null) ThrowException(AuthenticationMethod.AUDIO_SOURCE_IS_NULL);
             _courentAudioMixerSnapshot = MasterLvl.FindSnapshot("Lvl " + _gameInfo.Lvl);
@@ -143,10 +157,30 @@ namespace Assets.Scripts
             CourentSource.time = 0;
         }
 
+        private string ReturnNameAudio(int lvl)
+        {
+            switch (lvl)
+            {
+                case 1:
+                    return AUDIO_SOURCE_LVL_1;
+                case 2:
+                    return AUDIO_SOURCE_LVL_2;
+                case 3:
+                    return AUDIO_SOURCE_LVL_3;
+                case 4:
+                    return AUDIO_SOURCE_LVL_4;
+                case 5:
+                    return AUDIO_SOURCE_LVL_5;
+                default:
+                    return AUDIO_SOURCE_LVL_1;
+            }
+        }
+
         private void ThrowException(AuthenticationMethod authenticationMethod)
         {
             throw new Exception(authenticationMethod.ToString());
         }
+
         //type-safe-enum pattern
         public sealed class AuthenticationMethod
         {

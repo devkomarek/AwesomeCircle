@@ -9,7 +9,6 @@ namespace Assets.Scripts.GameMaster{
         [SerializeField] private float _speed;
         [SerializeField] private float _startPosition;
         [SerializeField] private Material _roundBarrierMaterial;
-        [SerializeField] private int _dotConcentration;
         [SerializeField] private int _numCapVertices;
         [SerializeField] private Gradient _gradient;
         [SerializeField] private float _width;
@@ -48,12 +47,6 @@ namespace Assets.Scripts.GameMaster{
         {
             get { return _numCapVertices; }
             set { _numCapVertices = value; }
-        }
-
-        public int DotConcentration
-        {
-            get { return _dotConcentration; }
-            set { _dotConcentration = value; }
         }
 
         public Material RoundBarrierMaterial
@@ -100,9 +93,26 @@ namespace Assets.Scripts.GameMaster{
         {
             for (int i = 0; i < _segmentControllersList.Count; i++)
             {
+                if (Math.Abs(_segmentsList[i].End) == 45)
+                    _segmentControllersList[i].DotConcentration = 6;
+                else if (Math.Abs(_segmentsList[i].End) < 90)
+                    _segmentControllersList[i].DotConcentration = 10;
+                else if (Math.Abs(_segmentsList[i].End) <= 90)
+                    _segmentControllersList[i].DotConcentration = 20;
+                else if (Math.Abs(_segmentsList[i].End) <= 180)
+                    _segmentControllersList[i].DotConcentration = 26;
+                else if (Math.Abs(_segmentsList[i].End) <= 270)
+                    _segmentControllersList[i].DotConcentration = 33;
+                else
+                    _segmentControllersList[i].DotConcentration = 50;
                 _segmentControllersList[i].StartSegment = _segmentsList[i].Start + offset;
                 _segmentControllersList[i].EndSegment = _segmentsList[i].End;
             }
+        }
+
+        private void ManageDotConcentration()
+        {
+            
         }
 
         private void CreateOtherElementsRoundBarrier()

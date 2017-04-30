@@ -6,6 +6,13 @@ namespace Assets.Scripts
     {
         [SerializeField]private float _startSegment;
         [SerializeField]private float _endSegment;
+        [SerializeField]private int _dotConcentration;
+
+        public int DotConcentration
+        {
+            get { return _dotConcentration; }
+            set { _dotConcentration = value; }
+        }
 
         public float EndSegment
         {

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Assets.Scripts.ScriptableObject;
-using UnityEngine;
-using UnityEngine.VR.WSA.Input;
+﻿using UnityEngine;
 
 namespace Assets.Scripts{
     public class Move : MonoBehaviour{
