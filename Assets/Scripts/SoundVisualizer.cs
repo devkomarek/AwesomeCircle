@@ -36,7 +36,6 @@ namespace Assets.Scripts
         private float[] _visualScale;
         private int _amnVisual = 20;
         private GameObject[] _cubes;
-        private float _sampleRate;
         private float _audioProfile = 0.8f;
         private float[] _freqBand = new float[8];
         private float[] _bandBuffer = new float[8];
@@ -51,7 +50,6 @@ namespace Assets.Scripts
             _source = _audioController.CourentSource;
             _samples = new float[SAMPLE_SIZE];
             _spectrum = new float[SAMPLE_SIZE];
-            _sampleRate = AudioSettings.outputSampleRate;
             SpawnCircle();
             AudioProfile();
         }
@@ -216,36 +214,24 @@ namespace Assets.Scripts
             DbValue = 20*Mathf.Log10(RmsValue/RmsDivided);
             //Spectrum
             _source.GetSpectrumData(_spectrum, 0, FFTWindow.Blackman);
+        }
 
-//            //Pitch
-//            float maxV = 0;
-//            var maxN = 0;
-//            for (i = 0; i < SAMPLE_SIZE; i++)
+//        public void TheEnd()
+//        {
+//            foreach (var cube in _cubes)
 //            {
-//                if(!(_spectrum[i] > maxV) || !(_spectrum[i] > 0.0f))
-//                    continue;
-//                maxV = _spectrum[i];
-//                maxN = i;
-//            }
+//                Vector3 position = cube.transform.localPosition;
+//                position.z = 40;
+//                cube.transform.localPosition = Vector3.Slerp(cube.transform.localPosition, position, 1);
+//            }            
+//        }
 //
-//            float freqN = maxN;
-//            if (maxN > 0 && maxN < SAMPLE_SIZE - 1)
-//            {
-//                var dL = _spectrum[maxN - 1]/_spectrum[maxN];
-//                var dR = _spectrum[maxN + 1]/_spectrum[maxN];
-//                freqN += 0.5f*(dR*dR - dL*dL);
-//            }
-//            PitchValue = freqN*(_sampleRate/2)/SAMPLE_SIZE;
-        }
-
-        public void TheEnd()
-        {
-            foreach (var cube in _cubes)
-            {
-                Vector3 position = cube.transform.localPosition;
-                position.z = 40;
-                cube.transform.localPosition = Vector3.Slerp(cube.transform.localPosition, position, 20);
-            }
-        }
+//        public void ContinueAfterTheEnd()
+//        {
+//            GameObject cubes = GameObject.FindGameObjectWithTag("Cubes");
+//            Vector3 position = cubes.transform.localPosition;
+//            position.y = -39123f;
+//            cubes.transform.localPosition = Vector3.Slerp(cubes.transform.localPosition, position, 1);
+//        }
     }
 }

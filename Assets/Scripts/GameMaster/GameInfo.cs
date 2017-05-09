@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Assets.Scripts.ScriptableObject.Database;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.GameMaster{

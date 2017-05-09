@@ -8,7 +8,6 @@ Shader "Hero/Laser"
 		_DisplayTex ("Displacement Texture", 2D) = "white"{}
 		_Magnitude ("Magnitude", Range(0, .1)) = 1
 		_Distortion ("Distortion", Float) = 0.0
-		_LightSaberFactor("LightSaberFactor", Range(0.0,1.0)) = 0.0
 		_Color("Color",Color) = (1,1,1,1)
 	}
 	SubShader
@@ -42,14 +41,11 @@ Shader "Hero/Laser"
 				float2 uv : TEXCOORD0; 
 				float4 col : COLOR;
 			};
-          		    float _LineWidth;
-           		    float _LineScale;
 					sampler2D _MainTex;
 					float4 _MainTex_ST;
 					sampler2D _DisplayTex;
 					float _Magnitude;
 					float _Distortion;
-					float _LightSaberFactor;
 					float4 _Color;
 			v2f vert (appdata v)
 			{
@@ -70,14 +66,8 @@ Shader "Hero/Laser"
 
 				float4 tex = tex2D(_MainTex, i.uv + disp) * i.col;
 
-				if(tex.a < _LightSaberFactor)
-				{
-                	return tex;
-                }
-                else 
-                {
                 	return tex * _Color; 
-                }
+
 			}
 			ENDCG
 		}

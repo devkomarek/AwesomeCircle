@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Globalization;
 using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
@@ -30,6 +28,13 @@ public class Timer : MonoBehaviour
             TimeText.text = string.Concat("Time  ", "0", Seconds, ":", fraction);
         else
             TimeText.text = string.Concat("Time  ", "0", Seconds, ":", "0", fraction);
+    }
+
+    public void ResetTime()
+    {
+        TimeText.text = "Time  00:00";
+        Seconds = 0;
+        Timefloat = 0;
     }
 
     public void TheEnd()

@@ -76,7 +76,7 @@ namespace Assets.Scripts{
                     _move.Calculate(_positionRoundBarrier, segmentController.DotConcentration, segmentController, lineRenderer);
                     if (IsCollision(lineRenderer.GetPosition(0)) && IsDead == false)
                         _gm.EndGame();
-                        // GM.KillRoundBarrier(segmentGameObject);
+                        // _gm.KillRoundBarrier(segmentGameObject);
 
 
                 }

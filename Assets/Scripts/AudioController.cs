@@ -29,9 +29,6 @@ namespace Assets.Scripts
         private AudioMixerSnapshot _courentAudioMixerSnapshot;
         private AudioClip _bufferClip;
 
-        public delegate void Load();
-        public event Load WasLoad;
-
         public AudioSource CourentSource { get; set; }
 
         void Start ()

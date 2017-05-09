@@ -158,7 +158,7 @@ namespace Assets.Scripts{
                     }
                     else
                     {
-                        SetPositionLaserRenderer(205f, forwardFirePointPosition);
+                        SetPositionLaserRenderer(30f, forwardFirePointPosition);
                         _gun.Miss();
                     }
                 }

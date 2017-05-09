@@ -129,7 +129,7 @@ namespace Assets.Scripts.GameMaster{
             }
             else if (courentTime > THIRD_END_CHAPTER+600 && (int)((courentTime - 600) / 600) >= _courentChapterForSpeed)
             {
-                _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / _courentChapterForSpeed + 4;
+                _roundBarrierGenerator.Speed += _roundBarrierGenerator.Speed * 1 / _courentChapterForSpeed + _courentChapterForSpeed/2;
                 _courentChapterForSpeed += 2;
             }
                 
