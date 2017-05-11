@@ -22,12 +22,12 @@ namespace Assets.Scripts
 
         public static float GetFloatBest(int lvl)
         {
-            return ConvertTimeToFloat(PlayerPrefs.GetString(BEST + lvl,"Best 0:00"));
+            return ConvertTimeToFloat(PlayerPrefs.GetString(BEST + lvl,"Best 00:00"));
         }
 
         public static string GetTimeBest(int lvl)
         {
-            return PlayerPrefs.GetString(BEST + lvl, "Best 0:00");
+            return PlayerPrefs.GetString(BEST + lvl, "Best 00:00");
         }
 
         public static void SetBest(int lvl, string v)

@@ -49,11 +49,13 @@ namespace Assets.Scripts.GameMaster{
         private GameObject _mainCamera;
         private UnityAds _unityAds;
         private UnityAnalytics _unityAnalytics;
+        private Tutorialer _tutorialer;
 
         private void Start()
         {
             GameObject awesomeCircle = GameObject.Find("Awesome Circle");
             GameObject ui = awesomeCircle.transform.FindChild("UI").gameObject;
+            _tutorialer = GetComponent<Tutorialer>();
             _unityAds = GetComponent<UnityAds>();
             _unityAnalytics = GetComponent<UnityAnalytics>();
             _mainCamera = awesomeCircle.transform.FindChild("Main Camera").gameObject;
@@ -91,7 +93,6 @@ namespace Assets.Scripts.GameMaster{
                 _animatorAwesome.SetTrigger("Show");
                 _isFirstAwesome = false;
             }
-          //  Debug.Log(_isSwipe);
         }
 
         public void KillRoundBarrier(GameObject rb)
@@ -132,17 +133,24 @@ namespace Assets.Scripts.GameMaster{
 
         public void EndGame()
         {
-            if(_gameHasEnded)
+            if (_tutorialer.IsTutorial == true)
+            {
+                _tutorialer.TryAgain();
+                return;
+            }
+            if (_gameHasEnded)
                 return;
             IsLvlPlay = false;
             _isStart = false;
-            _unityAnalytics.Analise();
-            _randomizer.Disable();
+
             _bassCylinder.SetActive(false);
             _gameStart = false;
             _isRestart = false;
             SetActivite(false);
-            if(_timer.Seconds >= 15)
+    
+            _unityAnalytics.Analise();
+            _randomizer.Disable();
+            if (_timer.Seconds >= 15)
             _unityAds.ShowAd();
             _lvlManager.FreezAllRoundBarriers();
             
@@ -162,20 +170,13 @@ namespace Assets.Scripts.GameMaster{
             if (_isStart == true || _isShowCredit == true || _isSwipe == true || GameManager.ReturnNameLvl(_gameInfo.Lvl).Substring(0,4) == "Lock") return;
             _isStart = true;
             _isFirstAwesome = true;
-//            for (int i = 1; i < 6; i++)
-//            {
-//                if (AwesomeCircleAnimator.GetCurrentAnimatorStateInfo(0).IsName("Lvl " + i + " Menu"))
-//                {
-                    StartLvl(_gameInfo.Lvl);
-//                }
-//            }          
+
+                    StartLvl(_gameInfo.Lvl);  
         }
 
         private bool _isStart = false;
         private void StartLvl(int lvl)
-        {
-            // if() return;         
-            Debug.Log("hejo testujemy");
+        {     
             _isMenu = false;
             StartCoroutine(UnlockHeroGun(0.5f));
             _smallCircle2.transform.FindChild("Lock").GetComponent<Image>().enabled = false;
@@ -184,20 +185,27 @@ namespace Assets.Scripts.GameMaster{
             _cameraImageEffect.enabled = true;
             SetTriggers("StartGame");
             
-            _nextLvlAnimator.SetTrigger("Hide");
+           
             _gameInfo.LvlName = GameManager.ReturnNameLvl(lvl);
             
             _audioController.StartLvlPlay();
             _gameInfo.Lvl = lvl;
             _timer.MinusTime = Time.time;
-            _randomizer.SetUpWaveDatabase(lvl);
             _lvlText.text = _gameInfo.LvlName;
-            _lvlManager.UnFreezAllRoundBarriers();
-            _lvlManager.SetUpLvl(_gameInfo.Lvl);
+            _lvlManager.UnFreezAllRoundBarriers();           
             _cameraRay.PointsList.Clear();
             _heroGameObject.SetActive(true);
             _gameStart = true;
-            if(TestMode == false)
+            if (Math.Abs(GameManager.GetFloatBest(1)) < 1)
+            {
+                _tutorialer.enabled = true;
+                _tutorialer.StartTutorial();
+                return;
+            }
+            _randomizer.SetUpWaveDatabase(lvl);
+            _nextLvlAnimator.SetTrigger("Hide");
+            _lvlManager.SetUpLvl(_gameInfo.Lvl);
+            if (TestMode == false)
             SetActivite(true);
         }
 

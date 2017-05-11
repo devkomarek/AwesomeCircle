@@ -116,6 +116,16 @@ namespace Assets.Scripts
             CourentSource.Stop();
         }
 
+        public void Play()
+        {
+            CourentSource.Play();
+        }
+
+        public void Pause()
+        {
+            CourentSource.Pause();
+        }
+
         private void CurentSourcePlay()
         {
             CourentSource.Play();
