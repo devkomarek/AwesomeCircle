@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.GameMaster;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace Assets.Scripts
         private Dictionary<string, object> _dead;
         private List<int> _playTheSameLvl;
         private int _deadCounter;
+
         void Start ()
         {
             _deadCounter = 0;
@@ -21,7 +23,7 @@ namespace Assets.Scripts
             _dead = new Dictionary<string, object>();
             _playTheSameLvl = new List<int>();
             _gameInfo = GetComponent<GameInfo>();
-            _timer = GameObject.Find("Awesome Circle").transform.FindChild("UI").GetComponent<Timer>();
+            _timer = GameObject.Find("Awesome Circle").transform.Find("UI").GetComponent<Timer>();
         }
 
         public void Analise()
@@ -33,15 +35,36 @@ namespace Assets.Scripts
             //Analytics.limitUserTracking = true;
         }
 
+        public void AdFinished()
+        {
+            Analytics.CustomEvent("Ads", new Dictionary<string, object>() { { "Finished", 1 } });
+        }
+
+        public void AdSkipped()
+        {
+            Analytics.CustomEvent("Ads", new Dictionary<string, object>() { { "Skipped", 1 } });
+        }
+
+        public void AdFailed()
+        {
+            Analytics.CustomEvent("Ads", new Dictionary<string, object>() { { "Failed", 1 } });
+        }
+
         private void GetAheadCounte()
         {
             if (_timer.Seconds >= 60 && GameManager.LvlIsLock(_gameInfo.Lvl + 1))
             {
                 _achieveLvl.Add(_gameInfo.LvlName);
-                Debug.Log("ukonczyles lvl");
+                StartCoroutine(WaitForVoice());
             }
               
         }
+
+        IEnumerator WaitForVoice()
+        {
+            yield return new WaitForSeconds(1f);
+            PlayerPrefs.SetString("Lvl " + _gameInfo.Lvl, "true");
+        } 
 
         private void DeadCounte()
         {

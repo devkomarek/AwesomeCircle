@@ -14,7 +14,7 @@ namespace Assets.Editor.UnitTests
         [SetUp]
         public void Init()
         {
-            _roundBarrierGenerator = GameObject.Find("Awesome Circle").transform.FindChild("Game Master").GetComponent<RoundBarrierGenerator>();
+            _roundBarrierGenerator = GameObject.Find("Awesome Circle").transform.Find("Game Master").GetComponent<RoundBarrierGenerator>();
         }
         [TearDown]
         public void Cleanup()
@@ -35,8 +35,8 @@ namespace Assets.Editor.UnitTests
 
             Assert.AreEqual(GameObject.Find("r-0.0.0").transform.name, "r-0.0.0");
 
-            Assert.NotNull(GameObject.Find("r-0.0.0").transform.FindChild("HitSettings"));
-            Assert.AreEqual(GameObject.Find("r-0.0.0").transform.FindChild("HitSettings").GetChild(0).tag, "Hit");
+            Assert.NotNull(GameObject.Find("r-0.0.0").transform.Find("HitSettings"));
+            Assert.AreEqual(GameObject.Find("r-0.0.0").transform.Find("HitSettings").GetChild(0).tag, "Hit");
         }
 
     }

@@ -1,19 +1,26 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
     public class MuterAudio : MonoBehaviour
     {
-        public AudioListener AudioListener;
-        public Image[] ImageVoulme;   
+        public AudioController AudioController;
+        public Image[] ImageVoulme;
+        private bool _muteAudio = false;
         public void InvertVolume()
         {
+
             foreach (var image in ImageVoulme)
             {
                 image.enabled = !image.enabled;
             }
-            AudioListener.enabled = !AudioListener.enabled;
+            _muteAudio = !_muteAudio;
+
+            AudioController.ButtonSmallMuterPLay(_muteAudio);
         }
+
     }
 }

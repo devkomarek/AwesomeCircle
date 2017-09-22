@@ -5,11 +5,15 @@ using UnityEngine;
 
 namespace Assets.Scripts.GameMaster{
     [Serializable]
-    public class RoundBarrierGenerator : MonoBehaviour{
+    public class RoundBarrierGenerator : MonoBehaviour
+    {
+        public GM Gm;
+        public float BasicsSpeed;
         [SerializeField] private float _speed;
         [SerializeField] private float _startPosition;
         [SerializeField] private Material _roundBarrierMaterial;
         [SerializeField] private int _numCapVertices;
+        [SerializeField] private int _numCornerVertices;
         [SerializeField] private Gradient _gradient;
         [SerializeField] private float _width;
         [SerializeField] private float _playerZone;
@@ -49,6 +53,12 @@ namespace Assets.Scripts.GameMaster{
             set { _numCapVertices = value; }
         }
 
+        public int NumCornerVertices
+        {
+            get { return _numCornerVertices; }
+            set { _numCornerVertices = value; }
+        }
+
         public Material RoundBarrierMaterial
         {
             get { return _roundBarrierMaterial; }
@@ -67,7 +77,10 @@ namespace Assets.Scripts.GameMaster{
             GetRoundBarrierData(roundBarrierData);
             CreateGameObjectRoundBarrier();
             CreateOtherElementsRoundBarrier();
-            AddDataToSegmentController(offset);
+            if(Gm.IsAwesomeHexagonActive)
+                AddDataToSegmentControllerHexagon(offset);
+            else
+                AddDataToSegmentController(offset);
         }
 
         private void GetRoundBarrierData(RoundBarrier roundBarrierData)
@@ -107,6 +120,48 @@ namespace Assets.Scripts.GameMaster{
                     _segmentControllersList[i].DotConcentration = 50;
                 _segmentControllersList[i].StartSegment = _segmentsList[i].Start + offset;
                 _segmentControllersList[i].EndSegment = _segmentsList[i].End;
+            }
+        }
+
+        private void AddDataToSegmentControllerHexagon(int offset)
+        {
+            for (int i = 0; i < _segmentControllersList.Count; i++)
+            {
+                if (Math.Abs(_segmentsList[i].End) == 45)
+                    _segmentControllersList[i].DotConcentration = 3;
+                else if (Math.Abs(_segmentsList[i].End) < 90)
+                    _segmentControllersList[i].DotConcentration = 3;
+                else if (Math.Abs(_segmentsList[i].End) <= 90)
+                    _segmentControllersList[i].DotConcentration = 3;
+                else if (Math.Abs(_segmentsList[i].End) <= 180)
+                    _segmentControllersList[i].DotConcentration = 5;
+                else if (Math.Abs(_segmentsList[i].End) <= 270)
+                    _segmentControllersList[i].DotConcentration = 5;
+                else
+                    _segmentControllersList[i].DotConcentration = 7;
+
+                
+                _segmentControllersList[i].StartSegment = _segmentsList[i].Start + offset;
+                if (_segmentsList[i].End > 300)
+                    _segmentControllersList[i].EndSegment = _segmentsList[i].End - 90;
+                else
+                {
+                    if(_segmentsList[i].End == -90)
+                        _segmentControllersList[i].EndSegment = _segmentsList[i].End - 40;
+                    else if (_segmentsList[i].End == 90)
+                        _segmentControllersList[i].EndSegment = _segmentsList[i].End + 40;
+                    else if (_segmentsList[i].End >= -90 && _segmentsList[i].End <= 0)
+                    _segmentControllersList[i].EndSegment = _segmentsList[i].End - 70;
+                    else if (_segmentsList[i].End <= 90 && _segmentsList[i].End >= 0)
+                    {
+                        _segmentControllersList[i].EndSegment = _segmentsList[i].End + 70;
+                    }
+                    else
+                    {
+                        _segmentControllersList[i].EndSegment = _segmentsList[i].End;
+                    }
+                }
+                    
             }
         }
 

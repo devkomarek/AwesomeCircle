@@ -11,7 +11,7 @@ namespace Assets.Scripts.GameMaster
         private static string AWESOME = "Awesome";
         public Animator BottomSlideBarAnimator;
         public Animator LeftSlideBarAnimator;
-        public Animator BlackScreenAnimator;
+        private Animator _blackScreenAnimator;
         public Animator AwesomeCircleAnimator;
         public Text SlideBarText;
         public bool IsTutorial;
@@ -22,16 +22,19 @@ namespace Assets.Scripts.GameMaster
         private Timer _timer;
         private Randomizer _randomizer;
         private LvlManager _lvlManager;
+        private CameraRay _cameraRay;
         private int _step;
 
 
         private void Awake()
         {
-            _timer = GameObject.Find("Awesome Circle").transform.FindChild("UI").gameObject.GetComponent<Timer>();
+            _blackScreenAnimator = GameObject.Find("Awesome Circle").transform.Find("UI").Find("Tutorial").Find("Black_screen_tutorial").GetComponent<Animator>();
+            _timer = GameObject.Find("Awesome Circle").transform.Find("UI").gameObject.GetComponent<Timer>();
+            _cameraRay = GameObject.Find("Awesome Circle").transform.Find("Main Camera").GetComponent<CameraRay>();
             _roundBarrierGenerator = GetComponent<RoundBarrierGenerator>();
-            _audioController = GameObject.Find("Awesome Circle").transform.FindChild("Audio").GetComponent<AudioController>();
-            _hero = GameObject.Find("Awesome Circle").transform.FindChild("Hero").GetComponent<Hero>();
-            _gun = GameObject.Find("Awesome Circle").transform.FindChild("Hero").GetComponent<Gun>();
+            _audioController = GameObject.Find("Awesome Circle").transform.Find("Audio").GetComponent<AudioController>();
+            _hero = GameObject.Find("Awesome Circle").transform.Find("Hero").GetComponent<Hero>();
+            _gun = GameObject.Find("Awesome Circle").transform.Find("Hero").GetComponent<Gun>();
             _lvlManager = GetComponent<LvlManager>();
             _randomizer = GetComponent<Randomizer>();
         }
@@ -52,7 +55,6 @@ namespace Assets.Scripts.GameMaster
                 if (_gun.IsOverloaded == false)
                 {
                     _isRightSlideBarShow = false;
-                   // Debug.Log("asd");
                 }
                     
                 if (_step == -1 && _countRoundbarriers == 0)
@@ -105,10 +107,12 @@ namespace Assets.Scripts.GameMaster
         public void TryAgain()
         {
             if(_isTryAgain) return;
+            _cameraRay.PointsList.Clear();
             _isTryAgain = true;
             _step = 0;
             _hero.enabled = false;
             _roundBarrierGenerator.Speed = 0;
+            _roundBarrierGenerator.BasicsSpeed = 0;
             SlideBarText.text = TRY_AGAIN;
             LeftSlideBarAnimator.SetTrigger("Show");
             StartCoroutine(Reset());
@@ -117,7 +121,7 @@ namespace Assets.Scripts.GameMaster
         private IEnumerator Reset()
         {
             yield return new WaitForSeconds(2f);
-            BlackScreenAnimator.SetTrigger("Show");
+            _blackScreenAnimator.SetTrigger("Show");
             yield return new WaitForSeconds(0.5f);
             foreach (var roundBarrier in GameObject.FindGameObjectsWithTag("RoundBarrier"))
             {
@@ -169,6 +173,7 @@ namespace Assets.Scripts.GameMaster
             _step = 1;
             _roundBarrierGenerator.StartPosition = 10;
             _roundBarrierGenerator.Speed = 0;
+            _roundBarrierGenerator.BasicsSpeed = 0;
             List<Segment> listSegment = new List<Segment>();
             listSegment.Add(new Segment() {Start = 0,End = 90,DotConcentration = 40});
             _roundBarrierGenerator.CreateRoundBarrier(new RoundBarrier()
@@ -183,9 +188,12 @@ namespace Assets.Scripts.GameMaster
         private void Step2Again()
         {
             _step = 2;
+            _cameraRay.PointsList.Clear();
+            _gun.Ammo = 0.42f;
             _hero.enabled = true;
             _roundBarrierGenerator.StartPosition = 20.3f;
             _roundBarrierGenerator.Speed = 5;
+            _roundBarrierGenerator.BasicsSpeed = 5;
             StartCoroutine(WaitBetweenBarrier());
 
         }
@@ -193,9 +201,12 @@ namespace Assets.Scripts.GameMaster
         private void Step2()
         {
             _step = 2;
+            _cameraRay.PointsList.Clear();
+            _gun.Ammo = 0.42f;
             _hero.enabled = true;
             _roundBarrierGenerator.StartPosition = 25.3f;
             _roundBarrierGenerator.Speed = 5;
+            _roundBarrierGenerator.BasicsSpeed = 5;
             BottomSlideBarAnimator.SetTrigger("Show");
             StartCoroutine(WaitBetweenBarrier());
 

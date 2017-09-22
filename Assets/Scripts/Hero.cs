@@ -18,9 +18,9 @@ namespace Assets.Scripts{
 
         private void Start()
         {
-            _camRay = GameObject.Find("Awesome Circle").transform.FindChild("Main Camera").GetComponent<CameraRay>();
-            _gm = GameObject.Find("Awesome Circle").transform.FindChild("Game Master").GetComponent<GM>();
-            _shootEffect = transform.FindChild("Shoot Effect").gameObject;
+            _camRay = GameObject.Find("Awesome Circle").transform.Find("Main Camera").GetComponent<CameraRay>();
+            _gm = GameObject.Find("Awesome Circle").transform.Find("Game Master").GetComponent<GM>();
+            _shootEffect = transform.Find("Shoot Effect").gameObject;
             _startShootEffect = _shootEffect.transform.localScale.x;            
             _gun = GetComponent<Gun>();
             _positionsLineRenderer = new List<Vector3>();
@@ -58,7 +58,6 @@ namespace Assets.Scripts{
                 RoundBarrierIntersection(roundBarrierGameObjects);
             }
         }
-
 
         private Vector2 ReturnForwardPoint(Vector2 f)
         {
@@ -100,8 +99,50 @@ namespace Assets.Scripts{
                 return new Vector2(x1, y1);
             }
         }
+        //        LineRenderer lineRenderer = roundBarrier.transform.GetChild(i).GetChild(j).GetComponent<LineRenderer>();
+        //        int positionCount = lineRenderer.positionCount;
+        //        Vector3[] table = new Vector3[positionCount + 4];
+        //        lineRenderer.GetPositions(table);
+        //                            float w = 0.33f;
+        //        float x = Mathf.Atan2(lineRenderer.GetPosition(positionCount - 1).y, lineRenderer.GetPosition(positionCount - 1).x) * Mathf.Rad2Deg;
+        //        float res = x >= 0 ? x : x + 360;
+        //        float r = Vector2.Distance(table[0], Vector2.zero);
+        //        Vector3 p = new Vector3(Mathf.Cos(res * Mathf.Deg2Rad + w) * 10f, Mathf.Sin(res * Mathf.Deg2Rad + w) * 10f, 0);
+        //        Vector3 p2 = new Vector3(Mathf.Cos(res * Mathf.Deg2Rad - w) * 10f, Mathf.Sin(res * Mathf.Deg2Rad - w) * 10f, 0);
+        //        table[positionCount] = p;
+        //                            table[positionCount + 1] = p2;
+        //                            //
+        //                            x = Mathf.Atan2(lineRenderer.GetPosition(positionCount - 1).y, lineRenderer.GetPosition(positionCount - 1).x) * Mathf.Rad2Deg;
+        //                            res = x >= 0 ? x : x + 360;
+        //                            p = new Vector3(Mathf.Cos(res* Mathf.Deg2Rad + w) * 10f , Mathf.Sin(res* Mathf.Deg2Rad + w) * 10f, 0);
+        //                            p2 = new Vector3(Mathf.Cos(res* Mathf.Deg2Rad - w) * 10f , Mathf.Sin(res* Mathf.Deg2Rad - w) * 10f, 0);
+        //                            table[positionCount + 2] = p;
+        //                            table[positionCount + 3] = p2;
 
 
+        //                            Vector2 b = lineRenderer.GetPosition(lineRenderer.positionCount - 1);
+        //                            Vector2 a = lineRenderer.GetPosition(lineRenderer.positionCount - 2);
+        //
+        //                            Vector2 aPrim = new Vector2((b.x - a.x) + b.x, (b.y - a.y) + b.y);
+        //                            Vector2 rPrim = new Vector2((a.x*5)/6, (a.y * 5) / 6);
+        //                            Vector2 sPrim = new Vector2((aPrim.x+rPrim.x)*3/5,(aPrim.y+rPrim.y)*3/5);
+        //
+        //                            table = new Vector3[lineRenderer.positionCount + 2];
+        //                           // lineRenderer.GetPositions(table);
+        //                            for (int k = 1; k < lineRenderer.positionCount +1; k++)
+        //                            {
+        //                                table[k] = lineRenderer.GetPosition(k - 1);
+        //                            }
+        //                            table[lineRenderer.positionCount + 1] = sPrim;
+        //
+        //
+        //                           b = lineRenderer.GetPosition(0);
+        //                           a = lineRenderer.GetPosition(1);
+        //
+        //                           aPrim = new Vector2((b.x - a.x) + b.x, (b.y - a.y) + b.y);
+        //                           rPrim = new Vector2((a.x * 5) / 6, (a.y * 5) / 6);
+        //                           sPrim = new Vector2((aPrim.x + rPrim.x)*3 / 5, (aPrim.y + rPrim.y)*3 / 5);
+        //                            table[0] = sPrim;
         private List<GameObject> _rbToKill;
         private List<Vector3> _positionsLineRenderer;
 
@@ -141,20 +182,33 @@ namespace Assets.Scripts{
                             if (courrent < distance)
                             {
                                 distance = courrent;
-                                rbToKill = i;
+                                rbToKill = i;                               
                             }
                         }
-                        if(_rbToKill[rbToKill].transform.parent.childCount <= 1)
-                        _rbToKill[rbToKill].transform.parent.parent.GetComponent<RoundBarrierDraw>().IsDead = true;
-                        _gm.KillRoundBarrier(_rbToKill[rbToKill]);
-                        SetPositionLaserRenderer(distance, forwardFirePointPosition);
+                        if (_rbToKill[rbToKill].transform.parent.childCount <= 1)
+                        {
+                            _rbToKill[rbToKill].transform.parent.parent.GetComponent<RoundBarrierDraw>().IsDead = 10;
+                        }
+                        else
+                        {
+                            _rbToKill[rbToKill].transform.parent.parent.GetComponent<RoundBarrierDraw>().IsDead++;
+                        }                       
+                            _gm.KillRoundBarrier(_rbToKill[rbToKill]);
+                            SetPositionLaserRenderer(distance, forwardFirePointPosition);
                     }
                     else if (_rbToKill.Count == 1)
                     {
                         if (_rbToKill[0].transform.parent.childCount <= 1)
-                            _rbToKill[0].transform.parent.parent.GetComponent<RoundBarrierDraw>().IsDead = true;
+                        {
+                            _rbToKill[0].transform.parent.parent.GetComponent<RoundBarrierDraw>().IsDead = 10;
+                        }
+                        else
+                        {
+                            _rbToKill[0].transform.parent.parent.GetComponent<RoundBarrierDraw>().IsDead++;
+                        }
                         _gm.KillRoundBarrier(_rbToKill[0]);
-                        SetPositionLaserRenderer(Vector3.Distance(_positionsLineRenderer[0], Vector3.zero), forwardFirePointPosition);
+                            SetPositionLaserRenderer(Vector3.Distance(_positionsLineRenderer[0], Vector3.zero), forwardFirePointPosition);
+                       // Debug.Log("childCount[0] <= 1");
                     }
                     else
                     {

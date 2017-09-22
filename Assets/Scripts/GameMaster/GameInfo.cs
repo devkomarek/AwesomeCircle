@@ -10,7 +10,7 @@ namespace Assets.Scripts.GameMaster{
         private Text _timerText;
         void Start()
         {
-            _timerText = GameObject.Find("Awesome Circle").transform.FindChild("UI").FindChild("Timer").FindChild("Text").GetComponent<Text>();
+            _timerText = GameObject.Find("Awesome Circle").transform.Find("UI").Find("Timer").Find("Text").GetComponent<Text>();
         }
 
         void Update()

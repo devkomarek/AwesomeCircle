@@ -7,12 +7,15 @@ namespace Assets.Scripts
 {
     public class UnityAds : MonoBehaviour
     {
+        public AudioController AudioController;
+        public UnityAnalytics UnityAnalytics;
         public bool TestMode = false;
         public string AndroidGameID = "1400566";
         public string IOSGameID = "1400567";
         public int MaxAttempt;
         public bool Cancel = false;
-        private int _countTryDisplay;
+        public bool IsRequest = false;
+        public int CountTryDisplay;
         private bool _enable = true;
         private GameObject _creditSmallCircle;
         private GameObject _creditSmallCircleNo;
@@ -29,10 +32,10 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            _creditSmallCircle = GameObject.Find("Awesome Circle").transform.FindChild("UI").FindChild("Credit_circle").FindChild("Credit_small_circle").gameObject;
-            _creditSmallCircleNo = GameObject.Find("Awesome Circle").transform.FindChild("UI").FindChild("Credit_circle").FindChild("Credit_small_circle_no").gameObject;
-            _creditSmallCircleYes = GameObject.Find("Awesome Circle").transform.FindChild("UI").FindChild("Credit_circle").FindChild("Credit_small_circle_yes").gameObject;
-            _text = _creditSmallCircle.transform.FindChild("Button").FindChild("Text").GetComponent<Text>();
+            _creditSmallCircle = GameObject.Find("Awesome Circle").transform.Find("UI").Find("Credit_circle").Find("Credit_small_circle").gameObject;
+            _creditSmallCircleNo = GameObject.Find("Awesome Circle").transform.Find("UI").Find("Credit_circle").Find("Credit_small_circle_no").gameObject;
+            _creditSmallCircleYes = GameObject.Find("Awesome Circle").transform.Find("UI").Find("Credit_circle").Find("Credit_small_circle_yes").gameObject;
+            _text = _creditSmallCircle.transform.Find("Button").Find("Text").GetComponent<Text>();
             if (PlayerPrefs.GetString("Ads","true") == "true")
             {
                 _text.text = "on";
@@ -45,26 +48,31 @@ namespace Assets.Scripts
             }
         }
 
+        public bool IsAdShowing = false;
         public void ShowAd()
         {
-            _countTryDisplay++;
-            if (_enable && _countTryDisplay >= MaxAttempt)
+            CountTryDisplay++;
+            if (_enable && CountTryDisplay >= MaxAttempt)
             {
-               StartCoroutine(Request());
+                StartCoroutine(Request());
             }
+            if (_enable == false)
+                CountTryDisplay = 0;
         }
 
-        public void OnOfAd()
+        public void OnOffAd()
         {
 
             if (_text.text == "on")
             {
+                AudioController.ButtonSmallPlay();
                 _creditSmallCircleNo.SetActive(true);
                 _creditSmallCircleYes.SetActive(false);
                 _creditSmallCircle.SetActive(false);
             }
             if (_text.text == "off")
             {
+                AudioController.ButtonSmallPlay();
                 _creditSmallCircleNo.SetActive(false);
                 _creditSmallCircleYes.SetActive(true);
                 _creditSmallCircle.SetActive(false);
@@ -85,6 +93,7 @@ namespace Assets.Scripts
 
         public void No()
         {
+            AudioController.ButtonSmallPlay();
             _creditSmallCircleNo.SetActive(false);
             _creditSmallCircleYes.SetActive(false);
             _creditSmallCircle.SetActive(true);
@@ -93,6 +102,7 @@ namespace Assets.Scripts
 
         public void Yes()
         {
+            AudioController.ButtonSmallPlay();
             _creditSmallCircleNo.SetActive(false);
             _creditSmallCircleYes.SetActive(false);
             _creditSmallCircle.SetActive(true);
@@ -101,12 +111,22 @@ namespace Assets.Scripts
             _enable = false;
         }
 
+        IEnumerator ShowAdWhennReady()
+        {
+            while (!Advertisement.IsReady())
+                yield return null;
+            Advertisement.Show();
+            IsAdShowing = false;
+        }
+
         IEnumerator Request()
         {
             Cancel = false;
             bool adsIsReady = false;
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 20; i++)
             {
+                if (Application.internetReachability == NetworkReachability.NotReachable)
+                    break;
                 if (Advertisement.IsReady())
                 {
                     adsIsReady = true;
@@ -116,13 +136,46 @@ namespace Assets.Scripts
             }
             if (Cancel == false && adsIsReady == true)
             {
-                Advertisement.Show();
-                _countTryDisplay = 0;
+                ShowOptions options = new ShowOptions();
+                options.resultCallback = AdCallbackhandler;
+                Advertisement.Show(options);
             }
+            else
+            {
+                if (Application.internetReachability == NetworkReachability.NotReachable)
+                    CountTryDisplay ++;
+                else
+                {
+                    CountTryDisplay = 0;
+                }
+                    
+            }
+      
             Cancel = false;
         }
 
-        public void SetEnable(bool b)
+        void AdCallbackhandler(ShowResult result)
+        {
+            switch (result)
+            {
+                case ShowResult.Finished:
+                    UnityAnalytics.AdFinished();
+                    CountTryDisplay = 0;
+                    break;
+                case ShowResult.Skipped:
+                    UnityAnalytics.AdSkipped();
+                    CountTryDisplay = 0;
+                    break;
+                case ShowResult.Failed:
+                   UnityAnalytics.AdFailed();
+                    CountTryDisplay = 0;
+                    break;
+            }
+        }
+
+
+        public
+            void SetEnable(bool b)
         {
             _enable = b;
         }

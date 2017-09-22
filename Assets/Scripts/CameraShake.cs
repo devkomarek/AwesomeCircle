@@ -1,17 +1,13 @@
+using Assets.Scripts.GameMaster;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
     public class CameraShake : MonoBehaviour
     {
-        // Transform of the camera to shake. Grabs the gameObject's transform
-        // if null.
         public Transform camTransform;
-	
-        // How long the object should shake for.
-        public float shakeDuration = 0f;
-	
-        // Amplitude of the shake. A larger value shakes the camera harder.
+        public GM GameMaster;
+        public float shakeDuration = 0f;	
         public float shakeAmount = 0.7f;
         public float decreaseFactor = 1.0f;
 	
@@ -34,9 +30,13 @@ namespace Assets.Scripts
         {
             if (shakeDuration > 0)
             {
-                camTransform.localPosition = originalPos + Random.insideUnitSphere * shakeAmount;
-			
+                camTransform.localPosition = originalPos + Random.insideUnitSphere * shakeAmount;			
                 shakeDuration -= Time.deltaTime * decreaseFactor;
+                if (GameMaster.IsLvlPlay == false)
+                {
+                    shakeDuration = 0f;
+                    camTransform.localPosition = originalPos;
+                }
             }
             else
             {

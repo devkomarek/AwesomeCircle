@@ -9,6 +9,7 @@ namespace Assets.Scripts.GameMaster
         public Color CurrentColor;
         public Image[] Images;
         public Text[] Texts;
+        public Light Light;
         private Gradient _laserGradient;
         private Light _light;
         private Gradient _gradient;
@@ -16,8 +17,8 @@ namespace Assets.Scripts.GameMaster
         // Use this for initialization
         void Start ()
         {
-            _light = GameObject.Find("Awesome Circle").transform.FindChild("Plane").FindChild("Point light").GetComponent<Light>();
-            _laserGradient = GameObject.Find("Awesome Circle").transform.FindChild("Hero").GetComponent<Hero>().LaserGradient;
+            _light = GameObject.Find("Awesome Circle").transform.Find("Plane").Find("Point light").GetComponent<Light>();
+            _laserGradient = GameObject.Find("Awesome Circle").transform.Find("Hero").GetComponent<Hero>().LaserGradient;
             _gradient = GetComponent<RoundBarrierGenerator>().Gradient;
         }
 	
@@ -38,6 +39,7 @@ namespace Assets.Scripts.GameMaster
             {
                 text.color = CurrentColor;
             }
+            Light.color = CurrentColor;
             Gradient(_gradient);
             Gradient(_laserGradient);
         }

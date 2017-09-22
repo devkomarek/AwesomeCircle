@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.GameMaster;
+using UnityEngine;
 
 namespace Assets.Scripts
 {
@@ -19,6 +20,9 @@ namespace Assets.Scripts
         public Color MaxColor;
         public float SmoothLight = 0.5f;
         public GameObject Hero;
+        public RoundBarrierGenerator SpeedBarrier;
+        public float MinSpeedBarrier;
+        public float MaxSpeedBarrier;
         public float MinSizeHero;
         public float MaxSizeHero;
         public int Band;
@@ -71,17 +75,36 @@ namespace Assets.Scripts
         void Update () {
             AnalyzeSound();
             UpdateVisual();
-          //  UpdateBackground();
+            UpdateBackground();
             MakeFrequencyBands();
             BandBuffer();
             CreateAudioBands();
             UpdateHero();
             UpdateLight();
+            UpdateBarriersSpeed();
+            UpdateWidthBarriers();
+        }
+
+        private void UpdateWidthBarriers()
+        {
+            float a = (_audioBandBuffer[Band] * 1.2f) + 1.2f;
+            SpeedBarrier.Width = a;
         }
 
         private void UpdateHero()
         {
             Hero.transform.localScale = new Vector3((_audioBandBuffer[Band] * MaxSizeHero) + MinSizeHero, transform.localScale.y, (_audioBandBuffer[Band] * MaxSizeHero) + MinSizeHero);
+        }
+
+        private void UpdateBarriersSpeed()
+        {
+            float a = (_audioBandBuffer[Band]*SpeedBarrier.BasicsSpeed/4) + SpeedBarrier.BasicsSpeed;
+            if (SpeedBarrier.BasicsSpeed + 3 < a)
+            {
+                SpeedBarrier.Speed = SpeedBarrier.BasicsSpeed + 3;
+            }
+            else
+                SpeedBarrier.Speed = a;
         }
 
         private void UpdateLight()
@@ -213,7 +236,8 @@ namespace Assets.Scripts
             //DB
             DbValue = 20*Mathf.Log10(RmsValue/RmsDivided);
             //Spectrum
-            _source.GetSpectrumData(_spectrum, 0, FFTWindow.Blackman);
+
+            _source.GetSpectrumData(_spectrum, 0, FFTWindow.Hanning);
         }
 
 //        public void TheEnd()

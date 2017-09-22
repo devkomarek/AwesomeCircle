@@ -11,7 +11,8 @@ namespace Assets.Scripts{
         private Move _move;
         private float _positionRoundBarrier;
         public List<Segment> SegmentsList;
-        public bool IsDead = false;
+        public Vector3[] Vector3Positions;
+        public int IsDead = 0;
         private RoundBarrierGenerator _roundBarrierGenerator;
         private GM _gm;
 
@@ -23,7 +24,7 @@ namespace Assets.Scripts{
 
         private void Start()
         {
-            GameObject gameMaster = GameObject.Find("Awesome Circle").transform.FindChild("Game Master").gameObject;
+            GameObject gameMaster = GameObject.Find("Awesome Circle").transform.Find("Game Master").gameObject;
             _roundBarrierGenerator = gameMaster.GetComponent<RoundBarrierGenerator>();
             _gm = gameMaster.GetComponent<GM>();
             gameObject.AddComponent<Move>();
@@ -47,12 +48,13 @@ namespace Assets.Scripts{
                 for (int j = 0; j < transform.GetChild(i).transform.childCount; j++)
                 {
                     LineRenderer lineRenderer = transform.GetChild(i).GetChild(j).GetComponent<LineRenderer>();
-                    if(IsDead == false)
+                    if(IsDead <= transform.childCount)
                     lineRenderer.colorGradient = _roundBarrierGenerator.Gradient;
                     lineRenderer.material = _roundBarrierGenerator.RoundBarrierMaterial;
-                    lineRenderer.numCapVertices = _roundBarrierGenerator.NumCapVertices;
+                   // lineRenderer.numCapVertices = _roundBarrierGenerator.NumCapVertices;
+                   // lineRenderer.numCornerVertices = _roundBarrierGenerator.NumCornerVertices;
                     lineRenderer.startWidth = _roundBarrierGenerator.Width;
-                    lineRenderer.endWidth = _roundBarrierGenerator.Width;
+                    lineRenderer.endWidth = _roundBarrierGenerator.Width;                    
                 }
             }
         }
@@ -74,11 +76,13 @@ namespace Assets.Scripts{
                     LineRenderer lineRenderer = segmentGameObject.GetComponent<LineRenderer>();
                     lineRenderer.positionCount = segmentController.DotConcentration;
                     _move.Calculate(_positionRoundBarrier, segmentController.DotConcentration, segmentController, lineRenderer);
-                    if (IsCollision(lineRenderer.GetPosition(0)) && IsDead == false)
+
+                    if (IsCollision(lineRenderer.GetPosition(0)) && IsDead <= transform.childCount)
+                    {
+                       // Debug.Log("endGame");
                         _gm.EndGame();
-                        // _gm.KillRoundBarrier(segmentGameObject);
-
-
+                       // _gm.KillRoundBarrier(segmentGameObject);
+                    }
                 }
 
             }

@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class Gun : MonoBehaviour{
+    public class Gun : MonoBehaviour
+    {
+        public AudioController AudioController;
         public float EnoughAmmo;
         public float Ammo;
         [SerializeField]private float _minAmmo;
@@ -39,7 +41,7 @@ namespace Assets.Scripts
         void Start ()
         {
             _maxAmmo = Ammo;
-            _gm = GameObject.Find("Awesome Circle").transform.FindChild("Game Master").GetComponent<GM>();
+            _gm = GameObject.Find("Awesome Circle").transform.Find("Game Master").GetComponent<GM>();
         }
 	
         void Update ()
@@ -72,6 +74,7 @@ namespace Assets.Scripts
 
         public void Miss()
         {
+            AudioController.OverloadPlay();
             Ammo -= _powerShot;
         }
 
